@@ -135,6 +135,10 @@
                     <label class="form-label">วันที่ได้รับเอกสารตัวจริง</label>
                     <input type="text" id="editLocation" class="form-control" placeholder="เลือกวันที่...">
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">หมายเหตุเพิ่มเติม</label>
+                    <textarea id="editNotes" class="form-control" rows="3" placeholder="กรอกหมายเหตุเพิ่มเติม..."></textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
@@ -221,7 +225,8 @@
                                     const key = `${row.planId}-${row.id}`;
                                     trackingStore[key] = {
                                         step: row.step || '',
-                                        location: row.location || ''
+                                        location: row.location || '',
+                                        notes: row.notes || ''
                                     };
                                 }
                             });
@@ -354,7 +359,8 @@
                 const key = `${currentPlan}-${item.id}`;
                 const tracking = trackingStore[key] || { 
                     step: '', 
-                    location: '' 
+                    location: '',
+                    notes: ''
                 };
 
                 const row = document.createElement('tr');
@@ -384,7 +390,7 @@
                         ${formatDateThai(tracking.location)}
                     </td>
                     <td>
-                        <small class="text-muted d-block">${item.status ? '[' + item.status + '] ' : ''}</small>
+                        <small class="text-muted d-block">${item.status ? '[' + item.status + '] ' : ''}${tracking.notes || ''}</small>
                         ${item.originalNotes || '-'}
                     </td>
                 `;
@@ -408,11 +414,13 @@
 
         const tracking = trackingStore[key] || { 
             step: '', 
-            location: ''
+            location: '',
+            notes: ''
         };
 
         document.getElementById('editId').value = key;
         document.getElementById('editStep').value = tracking.step;
+        document.getElementById('editNotes').value = tracking.notes || '';
         datePicker.setDate(tracking.location);
 
         const modal = new bootstrap.Modal(document.getElementById('editModal'));
@@ -420,7 +428,7 @@
     }
 
         // !!! นำ URL ที่ได้จากการ Deploy Google Apps Script มาวางที่นี่ !!!
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzrqrIrK4p4fImNYryIP1cSn9yTngdgDiTg-YECsHCuD7mqatfGCvvt398lJ5qCE-I2zA/exec'; 
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxaVd39r-FTYQtPeuY1vc_FAwogNO3mEFD_ucw8z-FR3vI9MTT4RykzMQ0UOrfDQn7FqA/exec'; 
 
         async function saveChanges() {
             const saveBtn = document.getElementById('saveBtn');
@@ -429,6 +437,7 @@
             const key = document.getElementById('editId').value;
             const step = document.getElementById('editStep').value;
             const location = document.getElementById('editLocation').value;
+            const notes = document.getElementById('editNotes').value;
             const [planId, id] = key.split('-');
 
             // แสดงสถานะกำลังบันทึก
@@ -437,14 +446,14 @@
 
             try {
                 // 1. อัปเดตข้อมูลในหน่วยความจำชั่วคราว
-                trackingStore[key] = { step, location };
+                trackingStore[key] = { step, location, notes };
 
                 // 2. ส่งข้อมูลไปบันทึกใน Google Sheet (Database)
                 if (APPS_SCRIPT_URL) {
                     const response = await fetch(APPS_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
-                        body: JSON.stringify({ planId, id, step, location })
+                        body: JSON.stringify({ planId, id, step, location, notes })
                     });
                     console.log('บันทึกลง Database สำเร็จ');
                 }
