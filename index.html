@@ -80,6 +80,24 @@
             </div>
         </div>
 
+        <div class="mb-3">
+            <label class="form-label fw-bold d-block">กรองตามขั้นตอน:</label>
+            <div id="stepFilters" class="d-flex flex-wrap gap-2">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input step-filter" type="checkbox" value="WAITING" id="filterWaiting" checked>
+                    <label class="form-check-label" for="filterWaiting">รอการกรอก</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input step-filter" type="checkbox" value="กำลังดำเนินการเบิก" id="filterProcessing" checked>
+                    <label class="form-check-label" for="filterProcessing">กำลังดำเนินการเบิก</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input step-filter" type="checkbox" value="ยกเลิก/ไม่เบิก" id="filterCancel" checked>
+                    <label class="form-check-label" for="filterCancel">ยกเลิก/ไม่เบิก</label>
+                </div>
+            </div>
+        </div>
+
         <ul class="nav nav-tabs mb-3" id="deptTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="all-tab" onclick="switchTab('All')" type="button">ทั้งหมด</button>
@@ -127,6 +145,7 @@
                 <div class="mb-3">
                     <label class="form-label">ขั้นตอนปัจจุบัน</label>
                     <select id="editStep" class="form-select">
+                        <option value="">-- ว่าง (รอการกรอก) --</option>
                         <option value="กำลังดำเนินการเบิก">กำลังดำเนินการเบิก</option>
                         <option value="ยกเลิก/ไม่เบิก">ยกเลิก/ไม่เบิก/เบิกไปแล้ว</option>
                     </select>
@@ -347,6 +366,25 @@
                 filteredData = filteredData.filter(item => item.dept === currentTab);
             }
 
+            // Filter by Checkboxes (Step)
+            const checkedSteps = Array.from(document.querySelectorAll('.step-filter:checked')).map(cb => cb.value);
+            filteredData = filteredData.filter(item => {
+                const key = `${currentPlan}-${item.id}`;
+                const tracking = trackingStore[key] || { step: '' };
+                const step = tracking.step || 'WAITING';
+                
+                // Map actual step to filter group
+                let filterValue = step;
+                if (step.includes('ยกเลิก/ไม่เบิก')) {
+                    filterValue = 'ยกเลิก/ไม่เบิก';
+                } else if (step !== 'WAITING' && step !== 'ยกเลิก/ไม่เบิก') {
+                    // Group all other intermediate steps into "กำลังดำเนินการเบิก"
+                    filterValue = 'กำลังดำเนินการเบิก';
+                }
+                
+                return checkedSteps.includes(filterValue);
+            });
+
             // Filter by search text
             if (filter) {
                 filteredData = filteredData.filter(item => {
@@ -476,6 +514,12 @@
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
         renderTable(e.target.value);
+    });
+
+    document.querySelectorAll('.step-filter').forEach(cb => {
+        cb.addEventListener('change', () => {
+            renderTable(document.getElementById('searchInput').value);
+        });
     });
 
     // Initial load
