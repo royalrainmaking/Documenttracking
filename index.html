@@ -110,7 +110,7 @@
         <div class="mb-3">
             <div class="row g-2 align-items-center">
                 <div class="col-auto">
-                    <label class="form-label fw-bold mb-0">ช่วงวันที่ (วันที่ได้รับเอกสารตัวจริง):</label>
+                    <label class="form-label fw-bold mb-0">ช่วงวันที่ (ได้รับเอกสาร):</label>
                 </div>
                 <div class="col-auto">
                     <input type="text" id="startDate" class="form-control form-control-sm date-filter" placeholder="จากวันที่">
@@ -149,7 +149,7 @@
                         <th class="col-name">ชื่อผู้เบิก</th>
                         <th>ฝ่าย</th>
                         <th>ขั้นตอนปัจจุบัน</th>
-                        <th class="col-date">วันที่ได้รับเอกสารตัวจริง</th>
+                        <th class="col-date">วันที่ได้รับเอกสาร</th>
                         <th>หมายเหตุ</th>
                     </tr>
                 </thead>
@@ -182,7 +182,7 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">วันที่ได้รับเอกสารตัวจริง</label>
+                    <label class="form-label">วันที่ได้รับเอกสาร</label>
                     <input type="text" id="editLocation" class="form-control" placeholder="เลือกวันที่...">
                 </div>
                 <div class="mb-3">
@@ -378,13 +378,34 @@
 
         function formatDateThai(dateStr) {
             if (!dateStr) return '-';
-            const date = new Date(dateStr);
+            
+            let date;
+            // Handle different input formats
+            if (dateStr.includes('/')) {
+                // Handle DD/MM/YYYY or DD/MM/YY
+                const parts = dateStr.split('/');
+                let day = parseInt(parts[0]);
+                let month = parseInt(parts[1]) - 1;
+                let year = parseInt(parts[2]);
+                
+                // Convert 2-digit years or specific CE years to BE
+                if (year < 100) year += 2500;
+                if (year >= 2000 && year < 2100) year += 543;
+                
+                date = new Date(year - 543, month, day);
+            } else {
+                date = new Date(dateStr);
+            }
+
             if (isNaN(date)) return dateStr;
-            return date.toLocaleDateString('th-TH', {
-                year: '2-digit',
-                month: 'short',
-                day: 'numeric',
-            });
+
+            // Normalize year for display to be 2568, 2569 etc.
+            const day = date.getDate();
+            const monthNamesShort = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const thaiYear = date.getFullYear() + 543;
+            const shortThaiYear = thaiYear.toString().slice(-2);
+            
+            return `${day} ${monthNamesShort[date.getMonth()]} ${shortThaiYear}`;
         }
 
         function getFilteredData(filter = '') {
@@ -443,6 +464,29 @@
             return filteredData;
         }
 
+        function normalizeDateForExport(dateStr) {
+            if (!dateStr || dateStr === '-') return '-';
+            
+            let date;
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                let day = parseInt(parts[0]);
+                let month = parseInt(parts[1]) - 1;
+                let year = parseInt(parts[2]);
+                if (year < 100) year += 2500;
+                if (year >= 2000 && year < 2100) year += 543;
+                date = new Date(year - 543, month, day);
+            } else {
+                date = new Date(dateStr);
+            }
+
+            if (isNaN(date)) return dateStr;
+            const thaiYear = date.getFullYear() + 543;
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            return `${day}/${month}/${thaiYear}`;
+        }
+
         function exportToExcel() {
             const filter = document.getElementById('searchInput').value;
             const dataToExport = getFilteredData(filter);
@@ -468,7 +512,7 @@
                     'ฝ่าย': item.dept,
                     'หมวด': item.category,
                     'ขั้นตอนปัจจุบัน': tracking.step || 'รอการกรอก',
-                    'วันที่ได้รับเอกสารตัวจริง': tracking.location || '-',
+                    'วันที่ได้รับเอกสาร': normalizeDateForExport(tracking.location),
                     'สถานะ': item.status || '',
                     'หมายเหตุ': tracking.notes || '',
                     'หมายเหตุต้นฉบับ': item.originalNotes || ''
