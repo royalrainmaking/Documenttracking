@@ -76,6 +76,7 @@
                 <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาด้วยเลขหนังสือ ชื่อผู้เบิก หรือฝ่าย...">
             </div>
             <div class="col-md-6 text-end">
+                <button class="btn btn-outline-success me-2" onclick="exportToExcel()">Export to Excel</button>
                 <button class="btn btn-success" onclick="fetchData()">รีเฟรชข้อมูล</button>
             </div>
         </div>
@@ -88,12 +89,40 @@
                     <label class="form-check-label" for="filterWaiting">รอการกรอก</label>
                 </div>
                 <div class="form-check form-check-inline">
+                    <input class="form-check-input step-filter" type="checkbox" value="ยังไม่ได้รับเอกสารตัวจริง" id="filterNoOriginal" checked>
+                    <label class="form-check-label" for="filterNoOriginal">ยังไม่ได้รับเอกสารตัวจริง</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input step-filter" type="checkbox" value="อยู่ระหว่างแก้ไข" id="filterFixing" checked>
+                    <label class="form-check-label" for="filterFixing">อยู่ระหว่างแก้ไข</label>
+                </div>
+                <div class="form-check form-check-inline">
                     <input class="form-check-input step-filter" type="checkbox" value="กำลังดำเนินการเบิก" id="filterProcessing" checked>
                     <label class="form-check-label" for="filterProcessing">กำลังดำเนินการเบิก</label>
                 </div>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input step-filter" type="checkbox" value="ยกเลิก/ไม่เบิก" id="filterCancel" checked>
                     <label class="form-check-label" for="filterCancel">ยกเลิก/ไม่เบิก</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <label class="form-label fw-bold mb-0">ช่วงวันที่ (วันที่ได้รับเอกสารตัวจริง):</label>
+                </div>
+                <div class="col-auto">
+                    <input type="text" id="startDate" class="form-control form-control-sm date-filter" placeholder="จากวันที่">
+                </div>
+                <div class="col-auto">
+                    ถึงวันที่
+                </div>
+                <div class="col-auto">
+                    <input type="text" id="endDate" class="form-control form-control-sm date-filter" placeholder="ถึงวันที่">
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearDateFilter()">ล้างวันที่</button>
                 </div>
             </div>
         </div>
@@ -146,6 +175,8 @@
                     <label class="form-label">ขั้นตอนปัจจุบัน</label>
                     <select id="editStep" class="form-select">
                         <option value="">-- ว่าง (รอการกรอก) --</option>
+                        <option value="ยังไม่ได้รับเอกสารตัวจริง">ยังไม่ได้รับเอกสารตัวจริง</option>
+                        <option value="อยู่ระหว่างแก้ไข">อยู่ระหว่างแก้ไข</option>
                         <option value="กำลังดำเนินการเบิก">กำลังดำเนินการเบิก</option>
                         <option value="ยกเลิก/ไม่เบิก">ยกเลิก/ไม่เบิก/เบิกไปแล้ว</option>
                     </select>
@@ -168,6 +199,7 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
@@ -355,10 +387,7 @@
             });
         }
 
-        function renderTable(filter = '') {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-            
+        function getFilteredData(filter = '') {
             let filteredData = documentData;
             
             // Filter by tab
@@ -373,17 +402,35 @@
                 const tracking = trackingStore[key] || { step: '' };
                 const step = tracking.step || 'WAITING';
                 
-                // Map actual step to filter group
                 let filterValue = step;
                 if (step.includes('ยกเลิก/ไม่เบิก')) {
                     filterValue = 'ยกเลิก/ไม่เบิก';
+                } else if (step === 'ยังไม่ได้รับเอกสารตัวจริง') {
+                    filterValue = 'ยังไม่ได้รับเอกสารตัวจริง';
+                } else if (step === 'อยู่ระหว่างแก้ไข') {
+                    filterValue = 'อยู่ระหว่างแก้ไข';
                 } else if (step !== 'WAITING' && step !== 'ยกเลิก/ไม่เบิก') {
-                    // Group all other intermediate steps into "กำลังดำเนินการเบิก"
                     filterValue = 'กำลังดำเนินการเบิก';
                 }
                 
                 return checkedSteps.includes(filterValue);
             });
+
+            // Filter by Date Range
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            if (startDate || endDate) {
+                filteredData = filteredData.filter(item => {
+                    const key = `${currentPlan}-${item.id}`;
+                    const tracking = trackingStore[key] || { location: '' };
+                    const docDate = tracking.location;
+                    if (!docDate) return false;
+                    
+                    if (startDate && docDate < startDate) return false;
+                    if (endDate && docDate > endDate) return false;
+                    return true;
+                });
+            }
 
             // Filter by search text
             if (filter) {
@@ -392,6 +439,55 @@
                     return searchStr.includes(filter.toLowerCase());
                 });
             }
+
+            return filteredData;
+        }
+
+        function exportToExcel() {
+            const filter = document.getElementById('searchInput').value;
+            const dataToExport = getFilteredData(filter);
+            
+            if (dataToExport.length === 0) {
+                alert('ไม่มีข้อมูลให้ส่งออก');
+                return;
+            }
+
+            const exportRows = dataToExport.map(item => {
+                const key = `${currentPlan}-${item.id}`;
+                const tracking = trackingStore[key] || { 
+                    step: '', 
+                    location: '',
+                    notes: ''
+                };
+
+                return {
+                    'แผน': PLANS[currentPlan].name,
+                    'ลำดับ': item.id,
+                    'เลขหนังสือ': item.bookNum,
+                    'ชื่อผู้เบิก': item.name,
+                    'ฝ่าย': item.dept,
+                    'หมวด': item.category,
+                    'ขั้นตอนปัจจุบัน': tracking.step || 'รอการกรอก',
+                    'วันที่ได้รับเอกสารตัวจริง': tracking.location || '-',
+                    'สถานะ': item.status || '',
+                    'หมายเหตุ': tracking.notes || '',
+                    'หมายเหตุต้นฉบับ': item.originalNotes || ''
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportRows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Documents");
+            
+            const fileName = `export_${currentPlan}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function renderTable(filter = '') {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            let filteredData = getFilteredData(filter);
 
             filteredData.forEach(item => {
                 const key = `${currentPlan}-${item.id}`;
@@ -409,6 +505,14 @@
                 if (tracking.step === 'กวบ.') badgeClass = 'bg-warning text-dark';
                 else if (tracking.step === 'ฝบบ.') badgeClass = 'bg-primary';
                 else if (tracking.step === 'ส่งกลับกลุ่ม/ฝ่าย') badgeClass = 'bg-success';
+                else if (tracking.step === 'ยังไม่ได้รับเอกสารตัวจริง') {
+                    badgeClass = 'bg-info text-dark';
+                    row.classList.add('table-info');
+                }
+                else if (tracking.step === 'อยู่ระหว่างแก้ไข') {
+                    badgeClass = 'bg-warning text-dark';
+                    row.classList.add('table-warning');
+                }
                 else if (tracking.step === 'กำลังดำเนินการเบิก') {
                     badgeClass = 'bg-primary';
                     row.classList.add('table-primary');
@@ -437,6 +541,8 @@
         }
 
     let datePicker;
+    let startPicker, endPicker;
+
     document.addEventListener('DOMContentLoaded', () => {
         datePicker = flatpickr("#editLocation", {
             locale: "th",
@@ -444,7 +550,26 @@
             altInput: true,
             altFormat: "j M y",
         });
+
+        const commonDateConfig = {
+            locale: "th",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j M y",
+            onChange: function() {
+                renderTable(document.getElementById('searchInput').value);
+            }
+        };
+
+        startPicker = flatpickr("#startDate", commonDateConfig);
+        endPicker = flatpickr("#endDate", commonDateConfig);
     });
+
+    function clearDateFilter() {
+        startPicker.clear();
+        endPicker.clear();
+        renderTable(document.getElementById('searchInput').value);
+    }
 
     function openEdit(key) {
         const item = documentData.find(d => `${currentPlan}-${d.id}` === key);
