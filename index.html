@@ -280,6 +280,7 @@
                     Papa.parse(csvText, {
                         header: true,
                         skipEmptyLines: true,
+                        transformHeader: h => h.trim(),
                         complete: function(results) {
                             results.data.forEach(row => {
                                 if (row.planId && row.id) {
@@ -318,6 +319,7 @@
                 Papa.parse(csvText, {
                     header: true,
                     skipEmptyLines: true,
+                    transformHeader: h => h.trim(),
                     complete: function(results) {
                         processData(results.data);
                         updateTabs();
@@ -387,54 +389,96 @@
             renderTable(document.getElementById('searchInput').value);
         }
 
-        function formatDateThai(dateStr) {
-            if (!dateStr) return '-';
+        function getISODate(dateStr) {
+            if (!dateStr || dateStr === '-') return null;
             
-            let date;
-            // Handle different input formats
-            if (dateStr.includes('/')) {
-                // Handle DD/MM/YYYY or DD/MM/YY
-                const parts = dateStr.split('/');
-                let day = parseInt(parts[0]);
-                let month = parseInt(parts[1]) - 1;
-                let year = parseInt(parts[2]);
-                
-                // Convert 2-digit years or specific CE years to BE
-                if (year < 100) year += 2500;
-                if (year >= 2000 && year < 2100) year += 543;
-                
-                date = new Date(year - 543, month, day);
-            } else {
-                date = new Date(dateStr);
+            dateStr = dateStr.toString().trim();
+            const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            
+            // Handle Thai Month Names with spaces (e.g., "5 ก.พ. 26")
+            if (dateStr.includes(' ')) {
+                const parts = dateStr.split(/\s+/);
+                if (parts.length >= 3) {
+                    let day = parseInt(parts[0]);
+                    let monthIdx = thaiMonths.indexOf(parts[1]);
+                    if (monthIdx === -1) {
+                        monthIdx = thaiMonths.findIndex(m => parts[1].includes(m.replace('.', '')));
+                    }
+                    let year = parseInt(parts[2]);
+
+                    if (monthIdx !== -1 && !isNaN(day) && !isNaN(year)) {
+                        // Logic: If year is 26 and we are in 2026 CE, treat it as 2026
+                        // If it's 67, it's 2567 BE -> 2024 CE
+                        if (year < 100) {
+                            if (year === 26) year = 2026; // Special case for current CE year
+                            else year += 2500; // Assume BE for others like 67, 68
+                        }
+                        
+                        if (year > 2400) year -= 543; 
+                        
+                        const date = new Date(year, monthIdx, day);
+                        if (!isNaN(date.getTime())) {
+                            const y = date.getFullYear();
+                            const m = String(date.getMonth() + 1).padStart(2, '0');
+                            const d = String(date.getDate()).padStart(2, '0');
+                            return `${y}-${m}-${d}`;
+                        }
+                    }
+                }
             }
 
-            if (isNaN(date)) return dateStr;
+            // Handle multiple separators
+            const normalized = dateStr.replace(/[-.]/g, '/');
 
-            // Normalize year for display to be 2568, 2569 etc.
-            const day = date.getDate();
+            let date;
+            if (normalized.includes('/')) {
+                const parts = normalized.split('/');
+                if (parts.length < 3) return null;
+                
+                let day, month, year;
+                if (parseInt(parts[0]) > 1000) { // YYYY/MM/DD
+                    year = parseInt(parts[0]);
+                    month = parseInt(parts[1]) - 1;
+                    day = parseInt(parts[2]);
+                } else { // DD/MM/YYYY
+                    day = parseInt(parts[0]);
+                    month = parseInt(parts[1]) - 1;
+                    year = parseInt(parts[2]);
+                }
+                
+                if (year < 100) year += 2500; // Handle "67" -> 2567
+                if (year > 2400) year -= 543; // Convert BE to CE
+                
+                date = new Date(year, month, day);
+            } else {
+                // Try standard parsing
+                date = new Date(dateStr);
+                // If it's a BE year like 2567-02-13, browser might parse it as year 2567
+                if (!isNaN(date.getTime()) && date.getFullYear() > 2400) {
+                    date = new Date(date.getFullYear() - 543, date.getMonth(), date.getDate());
+                }
+            }
+
+            if (isNaN(date.getTime())) return null;
+            
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function formatDateThai(dateStr) {
+            const iso = getISODate(dateStr);
+            if (!iso) return dateStr || '-';
+            
+            const [y, m, d] = iso.split('-').map(v => parseInt(v));
+            const date = new Date(y, m - 1, d);
+            
             const monthNamesShort = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
             const thaiYear = date.getFullYear() + 543;
             const shortThaiYear = thaiYear.toString().slice(-2);
             
-            return `${day} ${monthNamesShort[date.getMonth()]} ${shortThaiYear}`;
-        }
-
-        function getISODate(dateStr) {
-            if (!dateStr) return null;
-            if (dateStr.includes('-')) return dateStr; // Already ISO
-
-            if (dateStr.includes('/')) {
-                const parts = dateStr.split('/');
-                let day = parts[0].padStart(2, '0');
-                let month = parts[1].padStart(2, '0');
-                let year = parseInt(parts[2]);
-                
-                if (year < 100) year += 2000;
-                if (year > 2500) year -= 543; // Convert BE to CE for ISO
-                
-                return `${year}-${month}-${day}`;
-            }
-            return null;
+            return `${d} ${monthNamesShort[date.getMonth()]} ${shortThaiYear}`;
         }
 
         function getFilteredData(filter = '') {
@@ -470,14 +514,25 @@
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             if (startDate || endDate) {
+                console.log('Filtering by date range:', { startDate, endDate });
                 filteredData = filteredData.filter(item => {
                     const docDate = getISODate(item.controlDate);
-                    if (!docDate) return false;
+                    if (!docDate) {
+                        console.log(`Skipping item ${item.bookNum} - invalid date: "${item.controlDate}"`);
+                        return false;
+                    }
                     
-                    if (startDate && docDate < startDate) return false;
-                    if (endDate && docDate > endDate) return false;
-                    return true;
+                    const isAfterStart = !startDate || docDate >= startDate;
+                    const isBeforeEnd = !endDate || docDate <= endDate;
+                    
+                    console.log(`Item ${item.bookNum}: docDate=${docDate}, startDate=${startDate}, match=${isAfterStart && isBeforeEnd}`);
+
+                    if (isAfterStart && isBeforeEnd) {
+                        return true;
+                    }
+                    return false;
                 });
+                console.log('Results after date filter:', filteredData.length);
             }
 
             // Filter by search text
