@@ -13,9 +13,10 @@
             font-family: 'Sarabun', sans-serif;
             background-color: #f8f9fa;
         }
-        .container {
+        .container-fluid {
             margin-top: 30px;
-            max-width: 1200px;
+            padding-left: 20px;
+            padding-right: 20px;
         }
         .card {
             border-radius: 15px;
@@ -31,14 +32,19 @@
             color: #0d6efd;
         }
         .table-responsive {
-            max-height: 600px;
-            overflow-y: auto;
+            margin-bottom: 20px;
         }
         .col-name {
-            min-width: 200px;
+            min-width: 150px;
         }
         .col-date {
-            min-width: 150px;
+            min-width: 120px;
+            white-space: nowrap;
+        }
+        .col-notes {
+            max-width: 300px;
+            word-wrap: break-word;
+            white-space: normal;
         }
         #docTable tbody tr {
             cursor: pointer;
@@ -69,7 +75,7 @@
     </div>
 </nav>
 
-<div class="container">
+<div class="container-fluid">
     <div class="card p-4">
         <div class="row mb-3">
             <div class="col-md-6">
@@ -110,7 +116,7 @@
         <div class="mb-3">
             <div class="row g-2 align-items-center">
                 <div class="col-auto">
-                    <label class="form-label fw-bold mb-0">ช่วงวันที่ (ได้รับเอกสาร):</label>
+                    <label class="form-label fw-bold mb-0">ช่วงวันที่ (วันที่ลงคุม):</label>
                 </div>
                 <div class="col-auto">
                     <input type="text" id="startDate" class="form-control form-control-sm date-filter" placeholder="จากวันที่">
@@ -146,11 +152,12 @@
                     <tr>
                         <th>ลำดับ</th>
                         <th>เลขหนังสือ</th>
+                        <th class="col-date">วันที่ลงคุม</th>
                         <th class="col-name">ชื่อผู้เบิก</th>
                         <th>ฝ่าย</th>
                         <th>ขั้นตอนปัจจุบัน</th>
                         <th class="col-date">วันที่ได้รับเอกสาร</th>
-                        <th>หมายเหตุ</th>
+                        <th class="col-notes">หมายเหตุ</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -183,7 +190,10 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">วันที่ได้รับเอกสาร</label>
-                    <input type="text" id="editLocation" class="form-control" placeholder="เลือกวันที่...">
+                    <div class="input-group">
+                        <input type="text" id="editLocation" class="form-control" placeholder="เลือกวันที่...">
+                        <button class="btn btn-outline-secondary" type="button" onclick="clearEditDate()">ล้างวันที่</button>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">หมายเหตุเพิ่มเติม</label>
@@ -337,6 +347,7 @@
                 return {
                     id: row['ลำดับที่'] || '',
                     bookNum: row['เลขหนังสือ'] || '',
+                    controlDate: row['วันที่ลงคุม'] || '',
                     name: row['ชื่อผู้เบิก'] || '',
                     dept: dept,
                     category: row['หมวด'] || '',
@@ -408,6 +419,24 @@
             return `${day} ${monthNamesShort[date.getMonth()]} ${shortThaiYear}`;
         }
 
+        function getISODate(dateStr) {
+            if (!dateStr) return null;
+            if (dateStr.includes('-')) return dateStr; // Already ISO
+
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split('/');
+                let day = parts[0].padStart(2, '0');
+                let month = parts[1].padStart(2, '0');
+                let year = parseInt(parts[2]);
+                
+                if (year < 100) year += 2000;
+                if (year > 2500) year -= 543; // Convert BE to CE for ISO
+                
+                return `${year}-${month}-${day}`;
+            }
+            return null;
+        }
+
         function getFilteredData(filter = '') {
             let filteredData = documentData;
             
@@ -437,14 +466,12 @@
                 return checkedSteps.includes(filterValue);
             });
 
-            // Filter by Date Range
+            // Filter by Date Range (Control Date)
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             if (startDate || endDate) {
                 filteredData = filteredData.filter(item => {
-                    const key = `${currentPlan}-${item.id}`;
-                    const tracking = trackingStore[key] || { location: '' };
-                    const docDate = tracking.location;
+                    const docDate = getISODate(item.controlDate);
                     if (!docDate) return false;
                     
                     if (startDate && docDate < startDate) return false;
@@ -456,7 +483,7 @@
             // Filter by search text
             if (filter) {
                 filteredData = filteredData.filter(item => {
-                    const searchStr = `${item.bookNum} ${item.name} ${item.dept} ${item.category} ${item.status}`.toLowerCase();
+                    const searchStr = `${item.bookNum} ${item.controlDate} ${item.name} ${item.dept} ${item.category} ${item.status}`.toLowerCase();
                     return searchStr.includes(filter.toLowerCase());
                 });
             }
@@ -508,6 +535,7 @@
                     'แผน': PLANS[currentPlan].name,
                     'ลำดับ': item.id,
                     'เลขหนังสือ': item.bookNum,
+                    'วันที่ลงคุม': normalizeDateForExport(item.controlDate),
                     'ชื่อผู้เบิก': item.name,
                     'ฝ่าย': item.dept,
                     'หมวด': item.category,
@@ -569,14 +597,15 @@
                 row.innerHTML = `
                     <td>${item.id}</td>
                     <td>${item.bookNum}</td>
+                    <td class="col-date">${formatDateThai(item.controlDate)}</td>
                     <td>${item.name}</td>
                     <td>${item.dept}</td>
                     <td><span class="badge ${badgeClass}">${tracking.step || '-'}</span></td>
-                    <td>
+                    <td class="col-date">
                         ${formatDateThai(tracking.location)}
                     </td>
-                    <td>
-                        <small class="text-muted d-block">${item.status ? '[' + item.status + '] ' : ''}${tracking.notes || ''}</small>
+                    <td class="col-notes">
+                        <small class="text-danger d-block">${item.status ? '[' + item.status + '] ' : ''}${tracking.notes || ''}</small>
                         ${item.originalNotes || '-'}
                     </td>
                 `;
@@ -613,6 +642,12 @@
         startPicker.clear();
         endPicker.clear();
         renderTable(document.getElementById('searchInput').value);
+    }
+
+    function clearEditDate() {
+        if (datePicker) {
+            datePicker.clear();
+        }
     }
 
     function openEdit(key) {
