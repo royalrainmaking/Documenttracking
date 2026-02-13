@@ -107,6 +107,10 @@
                     <label class="form-check-label" for="filterProcessing">กำลังดำเนินการเบิก</label>
                 </div>
                 <div class="form-check form-check-inline">
+                    <input class="form-check-input step-filter" type="checkbox" value="ยังไม่เสร็จสิ้นภารกิจ" id="filterNotFinished" checked>
+                    <label class="form-check-label" for="filterNotFinished">ยังไม่เสร็จสิ้นภารกิจ</label>
+                </div>
+                <div class="form-check form-check-inline">
                     <input class="form-check-input step-filter" type="checkbox" value="ยกเลิก/ไม่เบิก" id="filterCancel" checked>
                     <label class="form-check-label" for="filterCancel">ยกเลิก/ไม่เบิก</label>
                 </div>
@@ -185,6 +189,7 @@
                         <option value="ยังไม่ได้รับเอกสารตัวจริง">ยังไม่ได้รับเอกสารตัวจริง</option>
                         <option value="อยู่ระหว่างแก้ไข">อยู่ระหว่างแก้ไข</option>
                         <option value="กำลังดำเนินการเบิก">กำลังดำเนินการเบิก</option>
+                        <option value="ยังไม่เสร็จสิ้นภารกิจ">ยังไม่เสร็จสิ้นภารกิจ</option>
                         <option value="ยกเลิก/ไม่เบิก">ยกเลิก/ไม่เบิก/เบิกไปแล้ว</option>
                     </select>
                 </div>
@@ -503,6 +508,8 @@
                     filterValue = 'ยังไม่ได้รับเอกสารตัวจริง';
                 } else if (step === 'อยู่ระหว่างแก้ไข') {
                     filterValue = 'อยู่ระหว่างแก้ไข';
+                } else if (step === 'ยังไม่เสร็จสิ้นภารกิจ') {
+                    filterValue = 'ยังไม่เสร็จสิ้นภารกิจ';
                 } else if (step !== 'WAITING' && step !== 'ยกเลิก/ไม่เบิก') {
                     filterValue = 'กำลังดำเนินการเบิก';
                 }
@@ -643,6 +650,10 @@
                 else if (tracking.step === 'กำลังดำเนินการเบิก') {
                     badgeClass = 'bg-primary';
                     row.classList.add('table-primary');
+                }
+                else if (tracking.step === 'ยังไม่เสร็จสิ้นภารกิจ') {
+                    badgeClass = 'bg-dark text-white';
+                    row.classList.add('table-secondary');
                 }
                 else if (tracking.step === 'ยกเลิก/ไม่เบิก') {
                     badgeClass = 'bg-danger';
