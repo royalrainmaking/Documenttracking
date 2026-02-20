@@ -103,8 +103,12 @@
                     <label class="form-check-label" for="filterFixing">อยู่ระหว่างแก้ไข</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input step-filter" type="checkbox" value="กำลังดำเนินการเบิก" id="filterProcessing" checked>
-                    <label class="form-check-label" for="filterProcessing">กำลังดำเนินการเบิก</label>
+                    <input class="form-check-input step-filter" type="checkbox" value="กำลังดำเนินการ" id="filterProcessing" checked>
+                    <label class="form-check-label" for="filterProcessing">กำลังดำเนินการ</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input step-filter" type="checkbox" value="ส่งเบิกแล้ว (การเงิน)" id="filterSentToFinance" checked>
+                    <label class="form-check-label" for="filterSentToFinance">ส่งเบิกแล้ว (การเงิน)</label>
                 </div>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input step-filter" type="checkbox" value="ยังไม่เสร็จสิ้นภารกิจ" id="filterNotFinished" checked>
@@ -188,7 +192,8 @@
                         <option value="">-- ว่าง (รอการกรอก) --</option>
                         <option value="ยังไม่ได้รับเอกสารตัวจริง">ยังไม่ได้รับเอกสารตัวจริง</option>
                         <option value="อยู่ระหว่างแก้ไข">อยู่ระหว่างแก้ไข</option>
-                        <option value="กำลังดำเนินการเบิก">กำลังดำเนินการเบิก</option>
+                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                        <option value="ส่งเบิกแล้ว (การเงิน)">ส่งเบิกแล้ว (การเงิน)</option>
                         <option value="ยังไม่เสร็จสิ้นภารกิจ">ยังไม่เสร็จสิ้นภารกิจ</option>
                         <option value="ยกเลิก/ไม่เบิก">ยกเลิก/ไม่เบิก/เบิกไปแล้ว</option>
                     </select>
@@ -510,8 +515,12 @@
                     filterValue = 'อยู่ระหว่างแก้ไข';
                 } else if (step === 'ยังไม่เสร็จสิ้นภารกิจ') {
                     filterValue = 'ยังไม่เสร็จสิ้นภารกิจ';
+                } else if (step === 'กำลังดำเนินการ') {
+                    filterValue = 'กำลังดำเนินการ';
+                } else if (step === 'ส่งเบิกแล้ว (การเงิน)') {
+                    filterValue = 'ส่งเบิกแล้ว (การเงิน)';
                 } else if (step !== 'WAITING' && step !== 'ยกเลิก/ไม่เบิก') {
-                    filterValue = 'กำลังดำเนินการเบิก';
+                    filterValue = 'กำลังดำเนินการ';
                 }
                 
                 return checkedSteps.includes(filterValue);
@@ -647,9 +656,13 @@
                     badgeClass = 'bg-warning text-dark';
                     row.classList.add('table-warning');
                 }
-                else if (tracking.step === 'กำลังดำเนินการเบิก') {
+                else if (tracking.step === 'กำลังดำเนินการ' || tracking.step === 'กำลังดำเนินการเบิก') {
                     badgeClass = 'bg-primary';
                     row.classList.add('table-primary');
+                }
+                else if (tracking.step === 'ส่งเบิกแล้ว (การเงิน)') {
+                    badgeClass = 'bg-success';
+                    row.classList.add('table-success');
                 }
                 else if (tracking.step === 'ยังไม่เสร็จสิ้นภารกิจ') {
                     badgeClass = 'bg-dark text-white';
