@@ -35,16 +35,33 @@
             margin-bottom: 20px;
         }
         .col-name {
-            min-width: 150px;
+            min-width: 90px;
         }
         .col-date {
-            min-width: 120px;
+            min-width: 75px;
             white-space: nowrap;
         }
         .col-notes {
-            max-width: 300px;
+            max-width: 150px;
             word-wrap: break-word;
             white-space: normal;
+        }
+        #docTable {
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        #docTable thead th {
+            background-color: #0070C0;
+            color: white;
+            font-weight: bold;
+            border: 1px solid #004B96;
+            padding: 6px 8px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        #docTable tbody td {
+            border: 1px solid #D3D3D3;
+            padding: 4px 6px;
         }
         #docTable tbody tr {
             cursor: pointer;
@@ -82,7 +99,7 @@
                 <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาด้วยเลขหนังสือ ชื่อผู้เบิก หรือฝ่าย...">
             </div>
             <div class="col-md-6 text-end">
-                <button class="btn btn-outline-success me-2" onclick="exportToExcel()">Export to Excel</button>
+                <button class="btn btn-outline-danger me-2" onclick="exportToPDF()">Export PDF</button>
                 <button class="btn btn-success" onclick="fetchData()">รีเฟรชข้อมูล</button>
             </div>
         </div>
@@ -118,6 +135,91 @@
                     <input class="form-check-input step-filter" type="checkbox" value="ยกเลิก/ไม่เบิก" id="filterCancel" checked>
                     <label class="form-check-label" for="filterCancel">ยกเลิก/ไม่เบิก</label>
                 </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold d-block">กรองตามเดือน:</label>
+            <div id="monthFilters" class="d-flex flex-wrap gap-2">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="10" id="filterMonth10">
+                    <label class="form-check-label" for="filterMonth10">ต.ค. (ตุลาคม)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="11" id="filterMonth11">
+                    <label class="form-check-label" for="filterMonth11">พ.ย. (พฤศจิกายน)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="12" id="filterMonth12">
+                    <label class="form-check-label" for="filterMonth12">ธ.ค. (ธันวาคม)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="1" id="filterMonth1">
+                    <label class="form-check-label" for="filterMonth1">ม.ค. (มกราคม)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="2" id="filterMonth2">
+                    <label class="form-check-label" for="filterMonth2">ก.พ. (กุมภาพันธ์)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="3" id="filterMonth3">
+                    <label class="form-check-label" for="filterMonth3">มี.ค. (มีนาคม)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="4" id="filterMonth4">
+                    <label class="form-check-label" for="filterMonth4">เม.ย. (เมษายน)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="5" id="filterMonth5">
+                    <label class="form-check-label" for="filterMonth5">พ.ค. (พฤษภาคม)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="6" id="filterMonth6">
+                    <label class="form-check-label" for="filterMonth6">มิ.ย. (มิถุนายน)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="7" id="filterMonth7">
+                    <label class="form-check-label" for="filterMonth7">ก.ค. (กรกฎาคม)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="8" id="filterMonth8">
+                    <label class="form-check-label" for="filterMonth8">ส.ค. (สิงหาคม)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="9" id="filterMonth9">
+                    <label class="form-check-label" for="filterMonth9">ก.ย. (กันยายน)</label>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" onclick="clearMonthFilter()">ล้างเดือน</button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ลงคุม):</label>
+            <div id="durationControlFilters" class="d-flex flex-wrap gap-2">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input duration-control-checkbox" type="checkbox" value="30" id="filterDurationControl30">
+                    <label class="form-check-label" for="filterDurationControl30">เกิน 30 วัน ⚠️</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input duration-control-checkbox" type="checkbox" value="60" id="filterDurationControl60">
+                    <label class="form-check-label" for="filterDurationControl60">เกิน 60 วัน 🚨</label>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationControlFilter()">ล้างระยะเวลา</button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ได้รับเอกสาร):</label>
+            <div id="durationReceiptFilters" class="d-flex flex-wrap gap-2">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="30" id="filterDurationReceipt30">
+                    <label class="form-check-label" for="filterDurationReceipt30">เกิน 30 วัน ⚠️</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="60" id="filterDurationReceipt60">
+                    <label class="form-check-label" for="filterDurationReceipt60">เกิน 60 วัน 🚨</label>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationReceiptFilter()">ล้างระยะเวลา</button>
             </div>
         </div>
 
@@ -158,13 +260,18 @@
             <table class="table table-hover" id="docTable">
                 <thead class="table-light">
                     <tr>
-                        <th>ลำดับ</th>
-                        <th>เลขหนังสือ</th>
-                        <th class="col-date">วันที่ลงคุม</th>
-                        <th class="col-name">ชื่อผู้เบิก</th>
-                        <th>ฝ่าย</th>
-                        <th>ขั้นตอนปัจจุบัน</th>
-                        <th class="col-date">วันที่ได้รับเอกสาร</th>
+                        <th style="width: 30px;">
+                            <input type="checkbox" id="selectAllCheckbox" class="form-check-input">
+                        </th>
+                        <th style="width: 40px;">ลำดับ</th>
+                        <th style="width: 75px;">เลขหนังสือ</th>
+                        <th style="width: 60px;">วันที่ลงคุม</th>
+                        <th style="width: 90px;">จำนวนวัน</th>
+                        <th style="width: 170px;">ชื่อผู้เบิก</th>
+                        <th style="width: 50px;">ฝ่าย</th>
+                        <th style="width: 80px;">ขั้นตอนปัจจุบัน</th>
+                        <th style="width: 60px;">วันที่ได้รับเอกสาร</th>
+                        <th style="width: 90px;">จำนวนวัน*</th>
                         <th class="col-notes">หมายเหตุ</th>
                     </tr>
                 </thead>
@@ -223,6 +330,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <script>
         const PLANS = {
             bru: {
@@ -248,6 +357,23 @@
         let documentData = [];
         let currentTab = 'All';
         let trackingStore = {};
+        let selectedMonths = [];
+        let selectedDurationsFromControl = [];
+        let selectedDurationsFromReceipt = [];
+
+        function calculateDaysElapsed(dateStr) {
+            const isoDate = getISODate(dateStr);
+            if (!isoDate) return null;
+            
+            const [y, m, d] = isoDate.split('-').map(v => parseInt(v));
+            const date = new Date(y, m - 1, d);
+            const today = new Date();
+            
+            const diffTime = today.getTime() - date.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            return diffDays;
+        }
 
         function switchPlan(planId) {
             currentPlan = planId;
@@ -417,11 +543,12 @@
                     let year = parseInt(parts[2]);
 
                     if (monthIdx !== -1 && !isNaN(day) && !isNaN(year)) {
-                        // Logic: If year is 26 and we are in 2026 CE, treat it as 2026
-                        // If it's 67, it's 2567 BE -> 2024 CE
+                        // Logic: 00-40 is CE, 41-99 is BE
+                        // 24, 25, 26 = 2024, 2025, 2026 (CE)
+                        // 67, 68 = 2567, 2568 (BE)
                         if (year < 100) {
-                            if (year === 26) year = 2026; // Special case for current CE year
-                            else year += 2500; // Assume BE for others like 67, 68
+                            if (year <= 40) year += 2000; // 24 -> 2024 (CE)
+                            else year += 2500; // 67 -> 2567 (BE)
                         }
                         
                         if (year > 2400) year -= 543; 
@@ -456,7 +583,10 @@
                     year = parseInt(parts[2]);
                 }
                 
-                if (year < 100) year += 2500; // Handle "67" -> 2567
+                if (year < 100) {
+                    if (year <= 40) year += 2000; // 24 -> 2024 (CE)
+                    else year += 2500; // 67 -> 2567 (BE)
+                }
                 if (year > 2400) year -= 543; // Convert BE to CE
                 
                 date = new Date(year, month, day);
@@ -526,6 +656,50 @@
                 return checkedSteps.includes(filterValue);
             });
 
+            // Filter by Month
+            if (selectedMonths.length > 0) {
+                filteredData = filteredData.filter(item => {
+                    const docDate = getISODate(item.controlDate);
+                    if (!docDate) return false;
+                    const [year, month, day] = docDate.split('-').map(v => parseInt(v));
+                    return selectedMonths.includes(month.toString());
+                });
+            }
+
+            // Filter by Duration (Control Date)
+            if (selectedDurationsFromControl.length > 0) {
+                filteredData = filteredData.filter(item => {
+                    const daysElapsed = calculateDaysElapsed(item.controlDate);
+                    if (daysElapsed === null) return false;
+                    
+                    for (let duration of selectedDurationsFromControl) {
+                        const durationDays = parseInt(duration);
+                        if (daysElapsed >= durationDays) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            }
+
+            // Filter by Duration (Receipt Date)
+            if (selectedDurationsFromReceipt.length > 0) {
+                filteredData = filteredData.filter(item => {
+                    const key = `${currentPlan}-${item.id}`;
+                    const tracking = trackingStore[key] || { step: '', location: '', notes: '' };
+                    const daysElapsed = calculateDaysElapsed(tracking.location);
+                    if (daysElapsed === null) return false;
+                    
+                    for (let duration of selectedDurationsFromReceipt) {
+                        const durationDays = parseInt(duration);
+                        if (daysElapsed >= durationDays) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            }
+
             // Filter by Date Range (Control Date)
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
@@ -571,7 +745,10 @@
                 let day = parseInt(parts[0]);
                 let month = parseInt(parts[1]) - 1;
                 let year = parseInt(parts[2]);
-                if (year < 100) year += 2500;
+                if (year < 100) {
+                    if (year <= 40) year += 2000; // 24 -> 2024 (CE)
+                    else year += 2500; // 67 -> 2567 (BE)
+                }
                 if (year >= 2000 && year < 2100) year += 543;
                 date = new Date(year - 543, month, day);
             } else {
@@ -585,17 +762,51 @@
             return `${day}/${month}/${thaiYear}`;
         }
 
-        function exportToExcel() {
-            const filter = document.getElementById('searchInput').value;
-            const dataToExport = getFilteredData(filter);
+        function getFilterInfo() {
+            const monthNamesShort = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const monthNamesFull = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
             
-            if (dataToExport.length === 0) {
-                alert('ไม่มีข้อมูลให้ส่งออก');
+            const selectedMonthNames = selectedMonths.length > 0 
+                ? selectedMonths.map(m => monthNamesFull[parseInt(m)]).join(', ')
+                : 'ทั้งหมด';
+            
+            const checkedSteps = Array.from(document.querySelectorAll('.step-filter:checked')).map(cb => {
+                const label = cb.nextElementSibling?.textContent || cb.value;
+                return label;
+            }).join(', ');
+            
+            const durationControl = selectedDurationsFromControl.length > 0 
+                ? selectedDurationsFromControl.map(d => `เกิน ${d} วัน`).join(', ')
+                : 'ทั้งหมด';
+
+            const durationReceipt = selectedDurationsFromReceipt.length > 0 
+                ? selectedDurationsFromReceipt.map(d => `เกิน ${d} วัน`).join(', ')
+                : 'ทั้งหมด';
+            
+            const deptInfo = currentTab !== 'All' ? currentTab : 'ทั้งหมด';
+            
+            return {
+                monthInfo: selectedMonthNames,
+                statusInfo: checkedSteps || 'ทั้งหมด',
+                durationControlInfo: durationControl,
+                durationReceiptInfo: durationReceipt,
+                deptInfo: deptInfo
+            };
+        }
+
+        function exportToExcel() {
+            const checkedRows = Array.from(document.querySelectorAll('.row-checkbox:checked'));
+            
+            if (checkedRows.length === 0) {
+                alert('กรุณาเลือกแถวที่ต้องการ export');
                 return;
             }
 
-            const exportRows = dataToExport.map(item => {
-                const key = `${currentPlan}-${item.id}`;
+            const exportRows = checkedRows.map(checkbox => {
+                const key = checkbox.getAttribute('data-key');
+                const item = documentData.find(d => `${currentPlan}-${d.id}` === key);
+                if (!item) return null;
+                
                 const tracking = trackingStore[key] || { 
                     step: '', 
                     location: '',
@@ -616,14 +827,239 @@
                     'หมายเหตุ': tracking.notes || '',
                     'หมายเหตุต้นฉบับ': item.originalNotes || ''
                 };
-            });
+            }).filter(row => row !== null);
 
-            const ws = XLSX.utils.json_to_sheet(exportRows);
+            if (exportRows.length === 0) {
+                alert('ไม่มีข้อมูลให้ส่งออก');
+                return;
+            }
+
+            const filterInfo = getFilterInfo();
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Documents");
+            const headers = Object.keys(exportRows[0]);
+            
+            const dataArray = [
+                ['ระบบติดตามเอกสาร - ' + PLANS[currentPlan].name],
+                ['เดือน: ' + filterInfo.monthInfo, 'สถานะ: ' + filterInfo.statusInfo, 'ฝ่าย: ' + filterInfo.deptInfo],
+                ['ระยะเวลา (วันที่ลงคุม): ' + filterInfo.durationControlInfo, 'ระยะเวลา (วันที่ได้รับเอกสาร): ' + filterInfo.durationReceiptInfo],
+                [],
+                headers,
+                ...exportRows.map(row => headers.map(h => row[h]))
+            ];
+            
+            const ws = XLSX.utils.aoa_to_sheet(dataArray, { cellFormula: false });
+            
+            const titleStyle = {
+                font: { name: 'Sarabun', size: 14, bold: true, color: { rgb: 'FFFFFF' } },
+                fill: { fgColor: { rgb: '0070C0' } },
+                alignment: { horizontal: 'center', vertical: 'center' }
+            };
+
+            const headerStyle = {
+                font: { name: 'Sarabun', size: 11, bold: true, color: { rgb: 'FFFFFF' } },
+                fill: { fgColor: { rgb: '0070C0' } },
+                alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+                border: {
+                    top: { style: 'medium', color: { rgb: '004B96' } },
+                    bottom: { style: 'medium', color: { rgb: '004B96' } },
+                    left: { style: 'medium', color: { rgb: '004B96' } },
+                    right: { style: 'medium', color: { rgb: '004B96' } }
+                }
+            };
+
+            const filterStyle = {
+                font: { name: 'Sarabun', size: 10, color: { rgb: '333333' } },
+                alignment: { vertical: 'center', wrapText: true },
+                fill: { fgColor: { rgb: 'E7F0F7' } },
+                border: {
+                    top: { style: 'thin', color: { rgb: 'D3D3D3' } },
+                    bottom: { style: 'thin', color: { rgb: 'D3D3D3' } },
+                    left: { style: 'thin', color: { rgb: 'D3D3D3' } },
+                    right: { style: 'thin', color: { rgb: 'D3D3D3' } }
+                }
+            };
+
+            const cellStyle = {
+                font: { name: 'Sarabun', size: 10 },
+                alignment: { vertical: 'center', wrapText: true },
+                border: {
+                    top: { style: 'thin', color: { rgb: 'D3D3D3' } },
+                    bottom: { style: 'thin', color: { rgb: 'D3D3D3' } },
+                    left: { style: 'thin', color: { rgb: 'D3D3D3' } },
+                    right: { style: 'thin', color: { rgb: 'D3D3D3' } }
+                }
+            };
+
+            ws['A1'].s = titleStyle;
+            
+            for (let c = 0; c < headers.length; c++) {
+                const cellAddress = XLSX.utils.encode_cell({ r: 1, c: c });
+                if (ws[cellAddress]) {
+                    ws[cellAddress].s = filterStyle;
+                }
+            }
+            
+            for (let c = 0; c < headers.length; c++) {
+                const cellAddress = XLSX.utils.encode_cell({ r: 4, c: c });
+                ws[cellAddress].s = headerStyle;
+                
+                if (!ws[cellAddress]) {
+                    ws[cellAddress] = { v: headers[c] };
+                }
+                ws[cellAddress].s = headerStyle;
+            }
+
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let r = 5; r <= range.e.r; r++) {
+                for (let c = 0; c <= range.e.c; c++) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
+                    if (ws[cellAddress]) {
+                        ws[cellAddress].s = cellStyle;
+                    }
+                }
+            }
+
+            ws['!cols'] = [
+                { wch: 12 },
+                { wch: 8 },
+                { wch: 15 },
+                { wch: 14 },
+                { wch: 20 },
+                { wch: 12 },
+                { wch: 12 },
+                { wch: 20 },
+                { wch: 14 },
+                { wch: 12 },
+                { wch: 20 },
+                { wch: 20 }
+            ];
+
+            ws['!rows'] = [
+                { hpt: 25 },
+                { hpt: 20 },
+                { hpt: 20 },
+                { hpt: 5 },
+                { hpt: 25 }
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws, PLANS[currentPlan].name);
             
             const fileName = `export_${currentPlan}_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, fileName);
+        }
+
+        function exportToPDF() {
+            const filterInfo = getFilterInfo();
+            const today = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            let htmlContent = `
+                <style>
+                    @media print {
+                        thead { display: table-header-group; }
+                        tfoot { display: table-footer-group; }
+                        tr { page-break-inside: avoid; }
+                    }
+                    * { margin: 0; padding: 0; }
+                    body { font-family: 'Sarabun', 'MS Mincho', 'TH Sarabun New', sans-serif; }
+                </style>
+                <div style="padding: 8px; font-family: 'Sarabun', 'MS Mincho', 'TH Sarabun New', sans-serif; line-height: 1.3;">
+                    <h2 style="text-align: center; color: #0070C0; margin: 0 0 3px 0; font-size: 18px;">ระบบติดตามเอกสาร - ${PLANS[currentPlan].name}</h2>
+                    <p style="text-align: center; font-size: 10px; color: #666; margin: 0 0 5px 0;">วันที่พิมพ์: ${today}</p>
+                    
+                    <div style="margin-bottom: 5px; font-size: 9px;">
+                        <p style="margin: 1px 0;"><strong>เดือน:</strong> ${filterInfo.monthInfo}</p>
+                        <p style="margin: 1px 0;"><strong>สถานะ:</strong> ${filterInfo.statusInfo}</p>
+                        <p style="margin: 1px 0;"><strong>ฝ่าย:</strong> ${filterInfo.deptInfo}</p>
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
+                        <thead>
+                            <tr style="background-color: #0070C0; color: white;">
+                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 4%;">ลำดับ</th>
+                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 8%;">เลขหนังสือ</th>
+                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 7%;">วันที่ลงคุม</th>
+                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 6%;">จำนวนวัน</th>
+                                <th style="border: 1px solid #004B96; padding: 3px; width: 10%;">ชื่อผู้เบิก</th>
+                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 5%;">ฝ่าย</th>
+                                <th style="border: 1px solid #004B96; padding: 3px; width: 8%;">ขั้นตอน</th>
+                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 7%;">วันที่ได้รับ</th>
+                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 6%;">จำนวนวัน*</th>
+                                <th style="border: 1px solid #004B96; padding: 3px; width: 29%;">หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            let filteredData = getFilteredData(document.getElementById('searchInput').value);
+            
+            filteredData.forEach(item => {
+                const key = `${currentPlan}-${item.id}`;
+                const tracking = trackingStore[key] || { step: '', location: '', notes: '' };
+                const daysElapsed = calculateDaysElapsed(item.controlDate);
+                const daysFromReceipt = calculateDaysElapsed(tracking.location);
+                
+                let daysDisplay = daysElapsed !== null ? `${daysElapsed} วัน` : '-';
+                if (daysElapsed !== null) {
+                    if (daysElapsed >= 60) daysDisplay += ' 🚨';
+                    else if (daysElapsed >= 30) daysDisplay += ' ⚠️';
+                }
+                
+                let daysFromReceiptDisplay = daysFromReceipt !== null ? `${daysFromReceipt} วัน` : '-';
+                if (daysFromReceipt !== null) {
+                    if (daysFromReceipt >= 60) daysFromReceiptDisplay += ' 🚨';
+                    else if (daysFromReceipt >= 30) daysFromReceiptDisplay += ' ⚠️';
+                }
+                
+                let notesCell = '';
+                if (tracking.notes && item.originalNotes) {
+                    notesCell = `<span style="color: red;">${tracking.notes}</span> (${item.originalNotes})`;
+                } else if (tracking.notes) {
+                    notesCell = `<span style="color: red;">${tracking.notes}</span>`;
+                } else if (item.originalNotes) {
+                    notesCell = `(${item.originalNotes})`;
+                }
+                
+                htmlContent += `
+                    <tr>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${item.id}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${item.bookNum}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${formatDateThai(item.controlDate)}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${daysDisplay}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px;">${item.name}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${item.dept}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px;">${tracking.step || '-'}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${formatDateThai(tracking.location)}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${daysFromReceiptDisplay}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 2px;">${notesCell}</td>
+                    </tr>
+                `;
+            });
+            
+            htmlContent += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            const element = document.createElement('div');
+            element.innerHTML = htmlContent;
+            
+            const opt = {
+                margin: 3,
+                filename: `export_${currentPlan}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'png', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2.5,
+                    useCORS: true, 
+                    logging: false, 
+                    allowTaint: true, 
+                    backgroundColor: '#ffffff',
+                    windowHeight: 2000
+                },
+                jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' }
+            };
+            
+            html2pdf().set(opt).from(element).save();
         }
 
         function renderTable(filter = '') {
@@ -641,7 +1077,7 @@
                 };
 
                 const row = document.createElement('tr');
-                row.onclick = () => openEdit(key);
+                row.setAttribute('data-key', key);
                 
                 // Color coding for steps
                 let badgeClass = 'bg-secondary';
@@ -673,24 +1109,84 @@
                     row.classList.add('table-danger');
                 }
 
+                const daysElapsed = calculateDaysElapsed(item.controlDate);
+                let daysDisplay = '-';
+                
+                if (daysElapsed !== null) {
+                    let icon = '';
+                    if (daysElapsed >= 60) {
+                        icon = '🚨';
+                    } else if (daysElapsed >= 30) {
+                        icon = '⚠️';
+                    }
+                    daysDisplay = `${daysElapsed} วัน ${icon}`;
+                }
+
+                const daysElapsedFromReceipt = calculateDaysElapsed(tracking.location);
+                let daysFromReceiptDisplay = '-';
+                
+                if (daysElapsedFromReceipt !== null) {
+                    let icon = '';
+                    if (daysElapsedFromReceipt >= 60) {
+                        icon = '🚨';
+                    } else if (daysElapsedFromReceipt >= 30) {
+                        icon = '⚠️';
+                    }
+                    daysFromReceiptDisplay = `${daysElapsedFromReceipt} วัน ${icon}`;
+                }
+
                 row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.bookNum}</td>
-                    <td class="col-date">${formatDateThai(item.controlDate)}</td>
-                    <td>${item.name}</td>
-                    <td>${item.dept}</td>
-                    <td><span class="badge ${badgeClass}">${tracking.step || '-'}</span></td>
-                    <td class="col-date">
+                    <td><input type="checkbox" class="form-check-input row-checkbox" data-key="${key}"></td>
+                    <td onclick="openEdit('${key}')">${item.id}</td>
+                    <td onclick="openEdit('${key}')">${item.bookNum}</td>
+                    <td class="col-date" onclick="openEdit('${key}')">${formatDateThai(item.controlDate)}</td>
+                    <td style="text-align: center;" onclick="openEdit('${key}')">
+                        <strong>${daysDisplay}</strong>
+                    </td>
+                    <td onclick="openEdit('${key}')">${item.name}</td>
+                    <td onclick="openEdit('${key}')">${item.dept}</td>
+                    <td onclick="openEdit('${key}')"><span class="badge ${badgeClass}">${tracking.step || '-'}</span></td>
+                    <td class="col-date" onclick="openEdit('${key}')">
                         ${formatDateThai(tracking.location)}
                     </td>
-                    <td class="col-notes">
+                    <td style="text-align: center;" onclick="openEdit('${key}')">
+                        <strong>${daysFromReceiptDisplay}</strong>
+                    </td>
+                    <td class="col-notes" onclick="openEdit('${key}')">
                         <small class="text-danger d-block">${item.status ? '[' + item.status + '] ' : ''}${tracking.notes || ''}</small>
                         ${item.originalNotes || '-'}
                     </td>
                 `;
+                
+                const checkboxCell = row.querySelector('td:first-child');
+                checkboxCell.onclick = function(e) { e.stopPropagation(); };
+                
                 tbody.appendChild(row);
             });
+
+            setupSelectAllCheckbox();
         }
+
+    function setupSelectAllCheckbox() {
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+
+        selectAllCheckbox.addEventListener('change', function() {
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        rowCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
+                const someChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
+                
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            });
+        });
+    }
 
     let datePicker;
     let startPicker, endPicker;
@@ -715,11 +1211,87 @@
 
         startPicker = flatpickr("#startDate", commonDateConfig);
         endPicker = flatpickr("#endDate", commonDateConfig);
+
+        document.querySelectorAll('.month-filter-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const month = this.value;
+                if (this.checked) {
+                    if (!selectedMonths.includes(month)) {
+                        selectedMonths.push(month);
+                    }
+                } else {
+                    selectedMonths = selectedMonths.filter(m => m !== month);
+                }
+                renderTable(document.getElementById('searchInput').value);
+            });
+        });
+
+        document.querySelectorAll('.duration-control-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const duration = this.value;
+                if (this.checked) {
+                    if (!selectedDurationsFromControl.includes(duration)) {
+                        selectedDurationsFromControl.push(duration);
+                    }
+                } else {
+                    selectedDurationsFromControl = selectedDurationsFromControl.filter(d => d !== duration);
+                }
+                renderTable(document.getElementById('searchInput').value);
+            });
+        });
+
+        document.querySelectorAll('.duration-receipt-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const duration = this.value;
+                if (this.checked) {
+                    if (!selectedDurationsFromReceipt.includes(duration)) {
+                        selectedDurationsFromReceipt.push(duration);
+                    }
+                } else {
+                    selectedDurationsFromReceipt = selectedDurationsFromReceipt.filter(d => d !== duration);
+                }
+                renderTable(document.getElementById('searchInput').value);
+            });
+        });
+
+        document.querySelectorAll('.step-filter').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                renderTable(document.getElementById('searchInput').value);
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function() {
+            renderTable(this.value);
+        });
     });
 
     function clearDateFilter() {
         startPicker.clear();
         endPicker.clear();
+        renderTable(document.getElementById('searchInput').value);
+    }
+
+    function clearMonthFilter() {
+        selectedMonths = [];
+        document.querySelectorAll('.month-filter-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        renderTable(document.getElementById('searchInput').value);
+    }
+
+    function clearDurationControlFilter() {
+        selectedDurationsFromControl = [];
+        document.querySelectorAll('.duration-control-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        renderTable(document.getElementById('searchInput').value);
+    }
+
+    function clearDurationReceiptFilter() {
+        selectedDurationsFromReceipt = [];
+        document.querySelectorAll('.duration-receipt-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
         renderTable(document.getElementById('searchInput').value);
     }
 
