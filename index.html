@@ -99,7 +99,7 @@
                 <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาด้วยเลขหนังสือ ชื่อผู้เบิก หรือฝ่าย...">
             </div>
             <div class="col-md-6 text-end">
-                <button class="btn btn-outline-danger me-2" onclick="exportToPDF()">Export PDF</button>
+                <button class="btn btn-outline-danger me-2" onclick="exportToPDF()">พิมพ์ / Export PDF</button>
                 <button class="btn btn-success" onclick="fetchData()">รีเฟรชข้อมูล</button>
             </div>
         </div>
@@ -952,114 +952,111 @@
             const filterInfo = getFilterInfo();
             const today = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
             
+            let dataToExport = [];
+            const checkedRows = document.querySelectorAll('.row-checkbox:checked');
+            if (checkedRows.length > 0) {
+                const selectedKeys = new Set(Array.from(checkedRows).map(cb => cb.getAttribute('data-key')));
+                dataToExport = documentData.filter(item => selectedKeys.has(`${currentPlan}-${item.id}`));
+            } else {
+                dataToExport = getFilteredData(document.getElementById('searchInput').value);
+            }
+
+            if (dataToExport.length === 0) {
+                alert('ไม่มีข้อมูลให้ส่งออก');
+                return;
+            }
+
+            // ปรับหัวกระดาษให้ชิดขอบบนสุดและประหยัดพื้นที่สูงสุด
             let htmlContent = `
-                <style>
-                    @media print {
-                        thead { display: table-header-group; }
-                        tfoot { display: table-footer-group; }
-                        tr { page-break-inside: avoid; }
-                    }
-                    * { margin: 0; padding: 0; }
-                    body { font-family: 'Sarabun', 'MS Mincho', 'TH Sarabun New', sans-serif; }
-                </style>
-                <div style="padding: 8px; font-family: 'Sarabun', 'MS Mincho', 'TH Sarabun New', sans-serif; line-height: 1.3;">
-                    <h2 style="text-align: center; color: #0070C0; margin: 0 0 3px 0; font-size: 18px;">ระบบติดตามเอกสาร - ${PLANS[currentPlan].name}</h2>
-                    <p style="text-align: center; font-size: 10px; color: #666; margin: 0 0 5px 0;">วันที่พิมพ์: ${today}</p>
-                    
-                    <div style="margin-bottom: 5px; font-size: 9px;">
-                        <p style="margin: 1px 0;"><strong>เดือน:</strong> ${filterInfo.monthInfo}</p>
-                        <p style="margin: 1px 0;"><strong>สถานะ:</strong> ${filterInfo.statusInfo}</p>
-                        <p style="margin: 1px 0;"><strong>ฝ่าย:</strong> ${filterInfo.deptInfo}</p>
+                <div style="padding: 0 5mm; background: white; font-family: 'Sarabun', sans-serif; color: black;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #0070C0; margin-bottom: 2px; padding-top: 1mm;">
+                        <h2 style="color: #0070C0; margin: 0; font-size: 16px;">ระบบติดตามเอกสาร - ${PLANS[currentPlan].name}</h2>
+                        <span style="font-size: 9px; color: #666;">วันที่พิมพ์: ${today}</span>
                     </div>
                     
-                    <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
+                    <div style="margin-bottom: 3px; font-size: 8px; color: #333; display: flex; flex-wrap: wrap; gap: 8px;">
+                        <span><strong>เดือน:</strong> ${filterInfo.monthInfo}</span>
+                        <span><strong>สถานะ:</strong> ${filterInfo.statusInfo}</span>
+                        <span><strong>ฝ่าย:</strong> ${filterInfo.deptInfo}</span>
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed;">
                         <thead>
                             <tr style="background-color: #0070C0; color: white;">
-                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 4%;">ลำดับ</th>
-                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 8%;">เลขหนังสือ</th>
-                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 7%;">วันที่ลงคุม</th>
-                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 6%;">จำนวนวัน</th>
-                                <th style="border: 1px solid #004B96; padding: 3px; width: 10%;">ชื่อผู้เบิก</th>
-                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 5%;">ฝ่าย</th>
-                                <th style="border: 1px solid #004B96; padding: 3px; width: 8%;">ขั้นตอน</th>
-                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 7%;">วันที่ได้รับ</th>
-                                <th style="border: 1px solid #004B96; padding: 3px; text-align: center; width: 6%;">จำนวนวัน*</th>
-                                <th style="border: 1px solid #004B96; padding: 3px; width: 29%;">หมายเหตุ</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 35px;">ลำดับ</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 75px;">เลขหนังสือ</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 75px;">วันที่ลงคุม</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 65px;">จำนวนวัน</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; width: 130px;">ชื่อผู้เบิก</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 55px;">ฝ่าย</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 95px;">ขั้นตอน</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 75px;">วันที่ได้รับ</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 65px;">จำนวนวัน*</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; width: auto;">หมายเหตุ</th>
                             </tr>
                         </thead>
                         <tbody>
             `;
 
-            let filteredData = getFilteredData(document.getElementById('searchInput').value);
-            
-            filteredData.forEach(item => {
+            dataToExport.forEach(item => {
                 const key = `${currentPlan}-${item.id}`;
                 const tracking = trackingStore[key] || { step: '', location: '', notes: '' };
                 const daysElapsed = calculateDaysElapsed(item.controlDate);
                 const daysFromReceipt = calculateDaysElapsed(tracking.location);
                 
+                // กำหนดสี Status Badge ให้เหมือนหน้าเว็บ
+                let badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #6c757d;";
+                if (tracking.step === 'กวบ.') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: #212529; background-color: #ffc107;";
+                else if (tracking.step === 'ฝบบ.') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #0d6efd;";
+                else if (tracking.step === 'ส่งกลับกลุ่ม/ฝ่าย') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #198754;";
+                else if (tracking.step === 'ยังไม่ได้รับเอกสารตัวจริง') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: #212529; background-color: #0dcaf0;";
+                else if (tracking.step === 'อยู่ระหว่างแก้ไข') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: #212529; background-color: #ffc107;";
+                else if (tracking.step === 'กำลังดำเนินการ' || tracking.step === 'กำลังดำเนินการเบิก') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #0d6efd;";
+                else if (tracking.step === 'ส่งเบิกแล้ว (การเงิน)') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #198754;";
+                else if (tracking.step === 'ยังไม่เสร็จสิ้นภารกิจ') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #212529;";
+                else if (tracking.step === 'ยกเลิก/ไม่เบิก') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #dc3545;";
+
                 let daysDisplay = daysElapsed !== null ? `${daysElapsed} วัน` : '-';
-                if (daysElapsed !== null) {
-                    if (daysElapsed >= 60) daysDisplay += ' 🚨';
-                    else if (daysElapsed >= 30) daysDisplay += ' ⚠️';
-                }
-                
                 let daysFromReceiptDisplay = daysFromReceipt !== null ? `${daysFromReceipt} วัน` : '-';
-                if (daysFromReceipt !== null) {
-                    if (daysFromReceipt >= 60) daysFromReceiptDisplay += ' 🚨';
-                    else if (daysFromReceipt >= 30) daysFromReceiptDisplay += ' ⚠️';
-                }
                 
-                let notesCell = '';
-                if (tracking.notes && item.originalNotes) {
-                    notesCell = `<span style="color: red;">${tracking.notes}</span> (${item.originalNotes})`;
-                } else if (tracking.notes) {
-                    notesCell = `<span style="color: red;">${tracking.notes}</span>`;
-                } else if (item.originalNotes) {
-                    notesCell = `(${item.originalNotes})`;
-                }
-                
+                let notes = tracking.notes || '';
+                if (item.status) notes = `<span style="color: red; font-weight: bold;">[${item.status}]</span> ${notes}`;
+                if (item.originalNotes) notes += (notes ? '<br>' : '') + `<small style="color: #666;">${item.originalNotes}</small>`;
+
                 htmlContent += `
                     <tr>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${item.id}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${item.bookNum}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${formatDateThai(item.controlDate)}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${daysDisplay}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px;">${item.name}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${item.dept}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px;">${tracking.step || '-'}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${formatDateThai(tracking.location)}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px; text-align: center;">${daysFromReceiptDisplay}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 2px;">${notesCell}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${item.id}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${item.bookNum}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${formatDateThai(item.controlDate)}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;"><strong>${daysDisplay}</strong></td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px;">${item.name}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${item.dept}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">
+                            <span style="${badgeStyle}">${tracking.step || '-'}</span>
+                        </td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${formatDateThai(tracking.location)}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;"><strong>${daysFromReceiptDisplay}</strong></td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px;">${notes || '-'}</td>
                     </tr>
                 `;
             });
             
-            htmlContent += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            const element = document.createElement('div');
-            element.innerHTML = htmlContent;
+            htmlContent += `</tbody></table></div>`;
             
             const opt = {
-                margin: 3,
+                margin: 0,
                 filename: `export_${currentPlan}_${new Date().toISOString().split('T')[0]}.pdf`,
-                image: { type: 'png', quality: 0.98 },
+                image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
-                    scale: 2.5,
+                    scale: 2, 
                     useCORS: true, 
-                    logging: false, 
-                    allowTaint: true, 
                     backgroundColor: '#ffffff',
-                    windowHeight: 2000
+                    letterRendering: true 
                 },
                 jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' }
             };
             
-            html2pdf().set(opt).from(element).save();
+            html2pdf().from(htmlContent).set(opt).save();
         }
 
         function renderTable(filter = '') {
