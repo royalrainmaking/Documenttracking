@@ -92,6 +92,8 @@
     </div>
 </nav>
 
+<div id="notificationArea" class="container-fluid"></div>
+
 <div class="container-fluid">
     <div class="card p-4">
         <div class="row mb-3">
@@ -269,7 +271,7 @@
                         <th style="width: 90px;">จำนวนวัน</th>
                         <th style="width: 170px;">ชื่อผู้เบิก</th>
                         <th style="width: 50px;">ฝ่าย</th>
-                        <th style="width: 80px;">ขั้นตอนปัจจุบัน</th>
+                        <th style="width: 110px;">ขั้นตอนปัจจุบัน</th>
                         <th style="width: 60px;">วันที่ได้รับเอกสาร</th>
                         <th style="width: 90px;">จำนวนวัน*</th>
                         <th class="col-notes">หมายเหตุ</th>
@@ -424,7 +426,8 @@
                                     trackingStore[key] = {
                                         step: row.step || '',
                                         location: row.location || '',
-                                        notes: row.notes || ''
+                                        notes: row.notes || '',
+                                        lastModified: row.lastModified || ''
                                     };
                                 }
                             });
@@ -823,6 +826,7 @@
                     'หมวด': item.category,
                     'ขั้นตอนปัจจุบัน': tracking.step || 'รอการกรอก',
                     'วันที่ได้รับเอกสาร': normalizeDateForExport(tracking.location),
+                    'เปลี่ยนแปลงล่าสุด': normalizeDateForExport(tracking.lastModified),
                     'สถานะ': item.status || '',
                     'หมายเหตุ': tracking.notes || '',
                     'หมายเหตุต้นฉบับ': item.originalNotes || ''
@@ -929,6 +933,7 @@
                 { wch: 12 },
                 { wch: 20 },
                 { wch: 14 },
+                { wch: 14 },
                 { wch: 12 },
                 { wch: 20 },
                 { wch: 20 }
@@ -1032,7 +1037,8 @@
                         <td style="border: 1px solid #D3D3D3; padding: 4px;">${item.name}</td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${item.dept}</td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">
-                            <span style="${badgeStyle}">${tracking.step || '-'}</span>
+                            <span style="${badgeStyle}">${tracking.step || '-'}</span><br>
+                            <span style="font-size: 7px; color: #666;">(${formatDateThai(tracking.lastModified)})</span>
                         </td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${formatDateThai(tracking.location)}</td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;"><strong>${daysFromReceiptDisplay}</strong></td>
@@ -1064,14 +1070,22 @@
             tbody.innerHTML = '';
             
             let filteredData = getFilteredData(filter);
+            let overdueCount = 0;
 
             filteredData.forEach(item => {
                 const key = `${currentPlan}-${item.id}`;
                 const tracking = trackingStore[key] || { 
                     step: '', 
                     location: '',
-                    notes: ''
+                    notes: '',
+                    lastModified: ''
                 };
+
+                // Track items older than 30 days since last modification
+                const daysSinceModified = calculateDaysElapsed(tracking.lastModified);
+                if (daysSinceModified !== null && daysSinceModified >= 30) {
+                    overdueCount++;
+                }
 
                 const row = document.createElement('tr');
                 row.setAttribute('data-key', key);
@@ -1132,6 +1146,12 @@
                     daysFromReceiptDisplay = `${daysElapsedFromReceipt} วัน ${icon}`;
                 }
 
+                // Calculate days from Last Modified
+                let lastModifiedDisplay = formatDateThai(tracking.lastModified);
+                if (daysSinceModified !== null && daysSinceModified >= 30) {
+                    lastModifiedDisplay = `<span class="text-danger fw-bold">${lastModifiedDisplay} 🕒</span>`;
+                }
+
                 row.innerHTML = `
                     <td><input type="checkbox" class="form-check-input row-checkbox" data-key="${key}"></td>
                     <td onclick="openEdit('${key}')">${item.id}</td>
@@ -1142,7 +1162,12 @@
                     </td>
                     <td onclick="openEdit('${key}')">${item.name}</td>
                     <td onclick="openEdit('${key}')">${item.dept}</td>
-                    <td onclick="openEdit('${key}')"><span class="badge ${badgeClass}">${tracking.step || '-'}</span></td>
+                    <td onclick="openEdit('${key}')">
+                        <span class="badge ${badgeClass}">${tracking.step || '-'}</span>
+                        <div style="font-size: 0.7rem; color: #6c757d; margin-top: 2px;">
+                            (${lastModifiedDisplay})
+                        </div>
+                    </td>
                     <td class="col-date" onclick="openEdit('${key}')">
                         ${formatDateThai(tracking.location)}
                     </td>
@@ -1161,7 +1186,22 @@
                 tbody.appendChild(row);
             });
 
+            updateNotification(overdueCount);
             setupSelectAllCheckbox();
+        }
+
+        function updateNotification(count) {
+            const notificationArea = document.getElementById('notificationArea');
+            if (count > 0) {
+                notificationArea.innerHTML = `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>⚠️ แจ้งเตือน:</strong> มีรายการที่ไม่ได้รับการแก้ไขเกิน 30 วัน ทั้งหมด <strong>${count}</strong> รายการ
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+            } else {
+                notificationArea.innerHTML = '';
+            }
         }
 
     function setupSelectAllCheckbox() {
@@ -1318,7 +1358,7 @@
     }
 
         // !!! นำ URL ที่ได้จากการ Deploy Google Apps Script มาวางที่นี่ !!!
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxaVd39r-FTYQtPeuY1vc_FAwogNO3mEFD_ucw8z-FR3vI9MTT4RykzMQ0UOrfDQn7FqA/exec'; 
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzr-ec0UK90Q_8r0m7RJuzWORKf6J0323ucfTDsnV8oUTIfS5MM1xRQ6EQb9uSsaKEPgw/exec'; 
 
         async function saveChanges() {
             const saveBtn = document.getElementById('saveBtn');
@@ -1328,6 +1368,7 @@
             const step = document.getElementById('editStep').value;
             const location = document.getElementById('editLocation').value;
             const notes = document.getElementById('editNotes').value;
+            const lastModified = new Date().toISOString().split('T')[0];
             const [planId, id] = key.split('-');
 
             // แสดงสถานะกำลังบันทึก
@@ -1336,14 +1377,14 @@
 
             try {
                 // 1. อัปเดตข้อมูลในหน่วยความจำชั่วคราว
-                trackingStore[key] = { step, location, notes };
+                trackingStore[key] = { step, location, notes, lastModified };
 
                 // 2. ส่งข้อมูลไปบันทึกใน Google Sheet (Database)
                 if (APPS_SCRIPT_URL) {
                     const response = await fetch(APPS_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
-                        body: JSON.stringify({ planId, id, step, location, notes })
+                        body: JSON.stringify({ planId, id, step, location, notes, lastModified })
                     });
                     console.log('บันทึกลง Database สำเร็จ');
                 }
