@@ -101,146 +101,170 @@
                 <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาด้วยเลขหนังสือ ชื่อผู้เบิก หรือฝ่าย...">
             </div>
             <div class="col-md-6 text-end">
+                <button class="btn btn-outline-primary me-2" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilter" aria-expanded="false" aria-controls="advancedFilter">
+                    🔍 ตัวกรองขั้นสูง
+                </button>
                 <button class="btn btn-outline-danger me-2" onclick="exportToPDF()">พิมพ์ / Export PDF</button>
                 <button class="btn btn-success" onclick="fetchData()">รีเฟรชข้อมูล</button>
             </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold d-block">กรองตามขั้นตอน:</label>
-            <div id="stepFilters" class="d-flex flex-wrap gap-2">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input step-filter" type="checkbox" value="WAITING" id="filterWaiting" checked>
-                    <label class="form-check-label" for="filterWaiting">รอการกรอก</label>
+        <div class="collapse mb-3" id="advancedFilter">
+            <div class="card card-body bg-light">
+                <div class="mb-3">
+                    <label class="form-label fw-bold d-block">กรองตามขั้นตอน:</label>
+                    <div id="stepFilters" class="d-flex flex-wrap gap-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input step-filter" type="checkbox" value="WAITING" id="filterWaiting" checked>
+                            <label class="form-check-label" for="filterWaiting">รอการกรอก</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input step-filter" type="checkbox" value="ยังไม่ได้รับเอกสารตัวจริง" id="filterNoOriginal" checked>
+                            <label class="form-check-label" for="filterNoOriginal">ยังไม่ได้รับเอกสารตัวจริง</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input step-filter" type="checkbox" value="อยู่ระหว่างแก้ไข" id="filterFixing" checked>
+                            <label class="form-check-label" for="filterFixing">อยู่ระหว่างแก้ไข</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input step-filter" type="checkbox" value="กำลังดำเนินการ" id="filterProcessing" checked>
+                            <label class="form-check-label" for="filterProcessing">กำลังดำเนินการ</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input step-filter" type="checkbox" value="ส่งเบิกแล้ว (การเงิน)" id="filterSentToFinance" checked>
+                            <label class="form-check-label" for="filterSentToFinance">ส่งเบิกแล้ว (การเงิน)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input step-filter" type="checkbox" value="ยังไม่เสร็จสิ้นภารกิจ" id="filterNotFinished" checked>
+                            <label class="form-check-label" for="filterNotFinished">ยังไม่เสร็จสิ้นภารกิจ</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input step-filter" type="checkbox" value="ยกเลิก/ไม่เบิก" id="filterCancel" checked>
+                            <label class="form-check-label" for="filterCancel">ยกเลิก/ไม่เบิก</label>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input step-filter" type="checkbox" value="ยังไม่ได้รับเอกสารตัวจริง" id="filterNoOriginal" checked>
-                    <label class="form-check-label" for="filterNoOriginal">ยังไม่ได้รับเอกสารตัวจริง</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input step-filter" type="checkbox" value="อยู่ระหว่างแก้ไข" id="filterFixing" checked>
-                    <label class="form-check-label" for="filterFixing">อยู่ระหว่างแก้ไข</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input step-filter" type="checkbox" value="กำลังดำเนินการ" id="filterProcessing" checked>
-                    <label class="form-check-label" for="filterProcessing">กำลังดำเนินการ</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input step-filter" type="checkbox" value="ส่งเบิกแล้ว (การเงิน)" id="filterSentToFinance" checked>
-                    <label class="form-check-label" for="filterSentToFinance">ส่งเบิกแล้ว (การเงิน)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input step-filter" type="checkbox" value="ยังไม่เสร็จสิ้นภารกิจ" id="filterNotFinished" checked>
-                    <label class="form-check-label" for="filterNotFinished">ยังไม่เสร็จสิ้นภารกิจ</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input step-filter" type="checkbox" value="ยกเลิก/ไม่เบิก" id="filterCancel" checked>
-                    <label class="form-check-label" for="filterCancel">ยกเลิก/ไม่เบิก</label>
-                </div>
-            </div>
-        </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold d-block">กรองตามเดือน:</label>
-            <div id="monthFilters" class="d-flex flex-wrap gap-2">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="10" id="filterMonth10">
-                    <label class="form-check-label" for="filterMonth10">ต.ค. (ตุลาคม)</label>
+                <div class="mb-3">
+                    <label class="form-label fw-bold d-block">กรองตามเดือน:</label>
+                    <div id="monthFilters" class="d-flex flex-wrap gap-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="10" id="filterMonth10">
+                            <label class="form-check-label" for="filterMonth10">ต.ค. (ตุลาคม)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="11" id="filterMonth11">
+                            <label class="form-check-label" for="filterMonth11">พ.ย. (พฤศจิกายน)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="12" id="filterMonth12">
+                            <label class="form-check-label" for="filterMonth12">ธ.ค. (ธันวาคม)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="1" id="filterMonth1">
+                            <label class="form-check-label" for="filterMonth1">ม.ค. (มกราคม)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="2" id="filterMonth2">
+                            <label class="form-check-label" for="filterMonth2">ก.พ. (กุมภาพันธ์)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="3" id="filterMonth3">
+                            <label class="form-check-label" for="filterMonth3">มี.ค. (มีนาคม)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="4" id="filterMonth4">
+                            <label class="form-check-label" for="filterMonth4">เม.ย. (เมษายน)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="5" id="filterMonth5">
+                            <label class="form-check-label" for="filterMonth5">พ.ค. (พฤษภาคม)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="6" id="filterMonth6">
+                            <label class="form-check-label" for="filterMonth6">มิ.ย. (มิถุนายน)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="7" id="filterMonth7">
+                            <label class="form-check-label" for="filterMonth7">ก.ค. (กรกฎาคม)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="8" id="filterMonth8">
+                            <label class="form-check-label" for="filterMonth8">ส.ค. (สิงหาคม)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="9" id="filterMonth9">
+                            <label class="form-check-label" for="filterMonth9">ก.ย. (กันยายน)</label>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="clearMonthFilter()">ล้างเดือน</button>
+                    </div>
                 </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="11" id="filterMonth11">
-                    <label class="form-check-label" for="filterMonth11">พ.ย. (พฤศจิกายน)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="12" id="filterMonth12">
-                    <label class="form-check-label" for="filterMonth12">ธ.ค. (ธันวาคม)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="1" id="filterMonth1">
-                    <label class="form-check-label" for="filterMonth1">ม.ค. (มกราคม)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="2" id="filterMonth2">
-                    <label class="form-check-label" for="filterMonth2">ก.พ. (กุมภาพันธ์)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="3" id="filterMonth3">
-                    <label class="form-check-label" for="filterMonth3">มี.ค. (มีนาคม)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="4" id="filterMonth4">
-                    <label class="form-check-label" for="filterMonth4">เม.ย. (เมษายน)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="5" id="filterMonth5">
-                    <label class="form-check-label" for="filterMonth5">พ.ค. (พฤษภาคม)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="6" id="filterMonth6">
-                    <label class="form-check-label" for="filterMonth6">มิ.ย. (มิถุนายน)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="7" id="filterMonth7">
-                    <label class="form-check-label" for="filterMonth7">ก.ค. (กรกฎาคม)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="8" id="filterMonth8">
-                    <label class="form-check-label" for="filterMonth8">ส.ค. (สิงหาคม)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input month-filter-checkbox" type="checkbox" value="9" id="filterMonth9">
-                    <label class="form-check-label" for="filterMonth9">ก.ย. (กันยายน)</label>
-                </div>
-                <button class="btn btn-outline-secondary btn-sm" onclick="clearMonthFilter()">ล้างเดือน</button>
-            </div>
-        </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ลงคุม):</label>
-            <div id="durationControlFilters" class="d-flex flex-wrap gap-2">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input duration-control-checkbox" type="checkbox" value="30" id="filterDurationControl30">
-                    <label class="form-check-label" for="filterDurationControl30">เกิน 30 วัน ⚠️</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input duration-control-checkbox" type="checkbox" value="60" id="filterDurationControl60">
-                    <label class="form-check-label" for="filterDurationControl60">เกิน 60 วัน 🚨</label>
-                </div>
-                <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationControlFilter()">ล้างระยะเวลา</button>
-            </div>
-        </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ลงคุม):</label>
+                        <div id="durationControlFilters" class="d-flex flex-wrap gap-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input duration-control-checkbox" type="checkbox" value="30" id="filterDurationControl30">
+                                <label class="form-check-label" for="filterDurationControl30">เกิน 30 วัน ⚠️</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input duration-control-checkbox" type="checkbox" value="60" id="filterDurationControl60">
+                                <label class="form-check-label" for="filterDurationControl60">เกิน 60 วัน 🚨</label>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationControlFilter()">ล้าง</button>
+                        </div>
+                    </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ได้รับเอกสาร):</label>
-            <div id="durationReceiptFilters" class="d-flex flex-wrap gap-2">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="30" id="filterDurationReceipt30">
-                    <label class="form-check-label" for="filterDurationReceipt30">เกิน 30 วัน ⚠️</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="60" id="filterDurationReceipt60">
-                    <label class="form-check-label" for="filterDurationReceipt60">เกิน 60 วัน 🚨</label>
-                </div>
-                <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationReceiptFilter()">ล้างระยะเวลา</button>
-            </div>
-        </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ได้รับเอกสาร):</label>
+                        <div id="durationReceiptFilters" class="d-flex flex-wrap gap-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="30" id="filterDurationReceipt30">
+                                <label class="form-check-label" for="filterDurationReceipt30">เกิน 30 วัน ⚠️</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="60" id="filterDurationReceipt60">
+                                <label class="form-check-label" for="filterDurationReceipt60">เกิน 60 วัน 🚨</label>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationReceiptFilter()">ล้าง</button>
+                        </div>
+                    </div>
 
-        <div class="mb-3">
-            <div class="row g-2 align-items-center">
-                <div class="col-auto">
-                    <label class="form-label fw-bold mb-0">ช่วงวันที่ (วันที่ลงคุม):</label>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-bold d-block">กรองตามระยะเวลา (ไม่มีการเปลี่ยนแปลง):</label>
+                        <div id="durationModifiedFilters" class="d-flex flex-wrap gap-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input duration-modified-checkbox" type="checkbox" value="30" id="filterDurationModified30">
+                                <label class="form-check-label" for="filterDurationModified30">เกิน 30 วัน ⚠️</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input duration-modified-checkbox" type="checkbox" value="60" id="filterDurationModified60">
+                                <label class="form-check-label" for="filterDurationModified60">เกิน 60 วัน 🚨</label>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationModifiedFilter()">ล้าง</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <input type="text" id="startDate" class="form-control form-control-sm date-filter" placeholder="จากวันที่">
-                </div>
-                <div class="col-auto">
-                    ถึงวันที่
-                </div>
-                <div class="col-auto">
-                    <input type="text" id="endDate" class="form-control form-control-sm date-filter" placeholder="ถึงวันที่">
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-outline-secondary btn-sm" onclick="clearDateFilter()">ล้างวันที่</button>
+
+                <div class="mb-0">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-auto">
+                            <label class="form-label fw-bold mb-0">ช่วงวันที่ (วันที่ลงคุม):</label>
+                        </div>
+                        <div class="col-auto">
+                            <input type="text" id="startDate" class="form-control form-control-sm date-filter" placeholder="จากวันที่">
+                        </div>
+                        <div class="col-auto">
+                            ถึงวันที่
+                        </div>
+                        <div class="col-auto">
+                            <input type="text" id="endDate" class="form-control form-control-sm date-filter" placeholder="ถึงวันที่">
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearDateFilter()">ล้างวันที่</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -362,6 +386,7 @@
         let selectedMonths = [];
         let selectedDurationsFromControl = [];
         let selectedDurationsFromReceipt = [];
+        let selectedDurationsFromModified = [];
 
         function calculateDaysElapsed(dateStr) {
             const isoDate = getISODate(dateStr);
@@ -421,13 +446,16 @@
                         transformHeader: h => h.trim(),
                         complete: function(results) {
                             results.data.forEach(row => {
-                                if (row.planId && row.id) {
-                                    const key = `${row.planId}-${row.id}`;
+                                const planId = (row.planId || '').trim();
+                                const id = (row.id || '').trim();
+                                if (planId && id) {
+                                    const key = `${planId}-${id}`;
                                     trackingStore[key] = {
-                                        step: row.step || '',
-                                        location: row.location || '',
-                                        notes: row.notes || '',
-                                        lastModified: row.lastModified || ''
+                                        step: (row.step || row['ขั้นตอน'] || row['สถานะ'] || '').trim(),
+                                        location: (row.location || row['วันที่ได้รับเอกสาร'] || row['วันที่ได้รับ'] || '').trim(),
+                                        notes: (row.notes || row['หมายเหตุ'] || row['หมายเหตุเพิ่มเติม'] || '').trim(),
+                                        // Handle cases where the lastModified header might be missing or named differently (including Thai)
+                                        lastModified: (row.lastModified || row[''] || row['__unnamed__'] || row['วันที่แก้ไขล่าสุด'] || row['เปลี่ยนแปลงล่าสุด'] || '').trim()
                                     };
                                 }
                             });
@@ -486,10 +514,10 @@
                 dept = dept.replace(/\.$/, '');
                 
                 return {
-                    id: row['ลำดับที่'] || '',
-                    bookNum: row['เลขหนังสือ'] || '',
-                    controlDate: row['วันที่ลงคุม'] || '',
-                    name: row['ชื่อผู้เบิก'] || '',
+                    id: (row['ลำดับที่'] || '').toString().trim(),
+                    bookNum: (row['เลขหนังสือ'] || '').toString().trim(),
+                    controlDate: (row['วันที่ลงคุม'] || '').toString().trim(),
+                    name: (row['ชื่อผู้เบิก'] || '').toString().trim(),
                     dept: dept,
                     category: row['หมวด'] || '',
                     originalNotes: row['หมายเหตุ'] || '',
@@ -696,6 +724,29 @@
                     for (let duration of selectedDurationsFromReceipt) {
                         const durationDays = parseInt(duration);
                         if (daysElapsed >= durationDays) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            }
+
+            // Filter by Duration (Modified Date)
+            if (selectedDurationsFromModified.length > 0) {
+                filteredData = filteredData.filter(item => {
+                    const key = `${currentPlan}-${item.id}`;
+                    const tracking = trackingStore[key] || { step: '', location: '', notes: '', lastModified: '' };
+                    
+                    let daysSinceModified = calculateDaysElapsed(tracking.lastModified);
+                    
+                    // หากไม่มีข้อมูล ให้ถือว่าเป็นเกิน 60 วันไปเลย (ตามโจทย์)
+                    if (daysSinceModified === null) {
+                        daysSinceModified = 999; // มากกว่า 60
+                    }
+                    
+                    for (let duration of selectedDurationsFromModified) {
+                        const durationDays = parseInt(duration);
+                        if (daysSinceModified >= durationDays) {
                             return true;
                         }
                     }
@@ -1005,7 +1056,7 @@
 
             dataToExport.forEach(item => {
                 const key = `${currentPlan}-${item.id}`;
-                const tracking = trackingStore[key] || { step: '', location: '', notes: '' };
+                const tracking = trackingStore[key] || { step: '', location: '', notes: '', lastModified: '' };
                 const daysElapsed = calculateDaysElapsed(item.controlDate);
                 const daysFromReceipt = calculateDaysElapsed(tracking.location);
                 
@@ -1038,7 +1089,7 @@
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${item.dept}</td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">
                             <span style="${badgeStyle}">${tracking.step || '-'}</span><br>
-                            <span style="font-size: 7px; color: #666;">(${formatDateThai(tracking.lastModified)})</span>
+                            <span style="font-size: 7.5px; color: #0d6efd; font-weight: bold;">(${formatDateThai(tracking.lastModified)})</span>
                         </td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${formatDateThai(tracking.location)}</td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;"><strong>${daysFromReceiptDisplay}</strong></td>
@@ -1164,7 +1215,7 @@
                     <td onclick="openEdit('${key}')">${item.dept}</td>
                     <td onclick="openEdit('${key}')">
                         <span class="badge ${badgeClass}">${tracking.step || '-'}</span>
-                        <div style="font-size: 0.7rem; color: #6c757d; margin-top: 2px;">
+                        <div style="font-size: 0.75rem; color: #0d6efd; font-weight: bold; margin-top: 2px;">
                             (${lastModifiedDisplay})
                         </div>
                     </td>
@@ -1291,6 +1342,20 @@
             });
         });
 
+        document.querySelectorAll('.duration-modified-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const duration = this.value;
+                if (this.checked) {
+                    if (!selectedDurationsFromModified.includes(duration)) {
+                        selectedDurationsFromModified.push(duration);
+                    }
+                } else {
+                    selectedDurationsFromModified = selectedDurationsFromModified.filter(d => d !== duration);
+                }
+                renderTable(document.getElementById('searchInput').value);
+            });
+        });
+
         document.querySelectorAll('.step-filter').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 renderTable(document.getElementById('searchInput').value);
@@ -1327,6 +1392,14 @@
     function clearDurationReceiptFilter() {
         selectedDurationsFromReceipt = [];
         document.querySelectorAll('.duration-receipt-checkbox').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        renderTable(document.getElementById('searchInput').value);
+    }
+
+    function clearDurationModifiedFilter() {
+        selectedDurationsFromModified = [];
+        document.querySelectorAll('.duration-modified-checkbox').forEach(checkbox => {
             checkbox.checked = false;
         });
         renderTable(document.getElementById('searchInput').value);
