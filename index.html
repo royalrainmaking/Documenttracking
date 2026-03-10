@@ -320,7 +320,7 @@
                         <th style="width: 50px;">ฝ่าย</th>
                         <th style="width: 110px;">ขั้นตอนปัจจุบัน</th>
                         <th style="width: 60px;">วันที่ได้รับเอกสาร</th>
-                        <th style="width: 90px;">จำนวนวัน*</th>
+                        <th style="width: 90px;">จบภารกิจมาแล้ว</th>
                         <th class="col-notes">หมายเหตุ</th>
                     </tr>
                 </thead>
@@ -1152,7 +1152,7 @@
                                 <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 55px;">ฝ่าย</th>
                                 <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 95px;">ขั้นตอน</th>
                                 <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 75px;">วันที่ได้รับ</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 65px;">จำนวนวัน*</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 65px;">จบภารกิจมาแล้ว</th>
                                 <th style="border: 1px solid #004B96; padding: 5px; width: auto;">หมายเหตุ</th>
                             </tr>
                         </thead>
@@ -1321,8 +1321,10 @@
                     lastModifiedDisplay = `<span class="text-danger fw-bold">${lastModifiedDisplay} 🕒</span>`;
                 }
 
-                // Check for Mission End Icon
+                // Check for Mission End Icon and Days Ended
                 let missionStatusIcon = '';
+                let missionEndedDaysDisplay = '-';
+                
                 if (missionEndDate) {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
@@ -1331,13 +1333,14 @@
                         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                         const titleText = diffDays === 0 ? 'จบภารกิจวันนี้' : `จบภารกิจมาแล้ว ${diffDays} วัน`;
                         
-                        // แยกสี icon: ถ้าเกิน 15 วัน ให้เป็นสีส้ม/เหลือง (ใช้ตัวเลือกอื่นแทนเขียว)
-                        let icon = '✅'; // เขียวปกติ
+                        // แยกสี icon
+                        let icon = '✅'; 
                         if (diffDays > 15) {
-                            icon = '✴️'; // หรือเลือกเป็นรูปอื่นที่สื่อถึงการค้างไว้นาน เช่น ⚠️ หรือ 🚩
+                            icon = '✴️'; 
                         }
                         
-                        missionStatusIcon = `<span title="${titleText}" style="cursor: help; margin-left: 5px;">${icon}</span><small class="text-danger fw-bold" style="font-size: 0.7rem;">(${diffDays})</small>`;
+                        missionStatusIcon = `<span title="${titleText}" style="cursor: help; margin-left: 5px;">${icon}</span>`;
+                        missionEndedDaysDisplay = `<strong class="text-danger">${diffDays} วัน</strong>`;
                     }
                 }
 
@@ -1361,7 +1364,7 @@
                         ${formatDateThai(tracking.location)}
                     </td>
                     <td style="text-align: center;" onclick="openEdit('${key}')">
-                        <strong>${daysFromReceiptDisplay}</strong> ${missionStatusIcon}
+                        ${missionEndedDaysDisplay} ${missionStatusIcon}
                     </td>
                     <td class="col-notes" onclick="openEdit('${key}')">
                         <small class="text-danger d-block">${item.status ? '[' + item.status + '] ' : ''}${tracking.notes || ''}</small>
