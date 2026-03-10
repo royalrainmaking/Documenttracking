@@ -87,7 +87,8 @@
         <div class="d-flex">
             <button class="btn btn-outline-light me-2 btn-sm active" id="btnPlanBru" onclick="switchPlan('bru')">แผน บรู</button>
             <button class="btn btn-outline-light me-2 btn-sm" id="btnPlanYut" onclick="switchPlan('yut')">แผนยุทธ</button>
-            <button class="btn btn-outline-light btn-sm" id="btnPlanFun" onclick="switchPlan('fun')">แผนฝุ่น</button>
+            <button class="btn btn-outline-light me-2 btn-sm" id="btnPlanFun" onclick="switchPlan('fun')">แผนฝุ่น</button>
+            <button class="btn btn-outline-light btn-sm" id="btnPlanHail" onclick="switchPlan('hail')">แผนลูกเห็บ</button>
         </div>
     </div>
 </nav>
@@ -374,6 +375,11 @@
                 name: 'แผนฝุ่น',
                 url: 'https://docs.google.com/spreadsheets/d/1iOX9ISvptU2UpMbVNPTuYHbA4df11dytCHxFYKoSQxg/export?format=csv&gid=2022149520',
                 color: '#dc3545' // Red
+            },
+            hail: {
+                name: 'แผนลูกเห็บ',
+                url: 'https://docs.google.com/spreadsheets/d/1SM0GYznjAKPOQT-itypsk83n7l5rx9ibWzKcLGZb4H4/export?format=csv&gid=1068774762',
+                color: '#6f42c1' // Purple
             }
         };
 
@@ -410,6 +416,7 @@
             document.getElementById('btnPlanBru').classList.toggle('active', planId === 'bru');
             document.getElementById('btnPlanYut').classList.toggle('active', planId === 'yut');
             document.getElementById('btnPlanFun').classList.toggle('active', planId === 'fun');
+            document.getElementById('btnPlanHail').classList.toggle('active', planId === 'hail');
 
             // Update Navbar Color
             const navbar = document.querySelector('.navbar');
