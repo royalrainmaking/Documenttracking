@@ -252,7 +252,11 @@
                         <div id="missionFilters" class="d-flex flex-wrap gap-2">
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input mission-filter" type="checkbox" value="ENDED" id="filterMissionEnded" checked>
-                                <label class="form-check-label" for="filterMissionEnded">จบภารกิจแล้ว</label>
+                                <label class="form-check-label" for="filterMissionEnded">จบภารกิจไม่เกิน 15 วัน</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input mission-filter" type="checkbox" value="OVER15" id="filterMissionOver15" checked>
+                                <label class="form-check-label" for="filterMissionOver15">จบภารกิจเกิน 15 วัน</label>
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input mission-filter" type="checkbox" value="PROGRESS" id="filterMissionProgress" checked>
@@ -861,14 +865,20 @@
 
             // Filter by Mission Status
             const checkedMissionStatuses = Array.from(document.querySelectorAll('.mission-filter:checked')).map(cb => cb.value);
-            if (checkedMissionStatuses.length < 3) { // Only filter if not all are checked
+            if (checkedMissionStatuses.length < 4) { // Only filter if not all are checked (now 4 options)
                 filteredData = filteredData.filter(item => {
                     const missionEndDate = parseMissionEndDate(item.originalNotes);
                     let status = 'NODATE';
                     if (missionEndDate) {
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
-                        status = today >= missionEndDate ? 'ENDED' : 'PROGRESS';
+                        if (today >= missionEndDate) {
+                            const diffTime = today.getTime() - missionEndDate.getTime();
+                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                            status = diffDays > 15 ? 'OVER15' : 'ENDED';
+                        } else {
+                            status = 'PROGRESS';
+                        }
                     }
                     return checkedMissionStatuses.includes(status);
                 });
@@ -1320,7 +1330,14 @@
                         const diffTime = today.getTime() - missionEndDate.getTime();
                         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                         const titleText = diffDays === 0 ? 'จบภารกิจวันนี้' : `จบภารกิจมาแล้ว ${diffDays} วัน`;
-                        missionStatusIcon = `<span title="${titleText}" style="cursor: help; margin-left: 5px;">✅</span><small class="text-danger fw-bold" style="font-size: 0.7rem;">(${diffDays})</small>`;
+                        
+                        // แยกสี icon: ถ้าเกิน 15 วัน ให้เป็นสีส้ม/เหลือง (ใช้ตัวเลือกอื่นแทนเขียว)
+                        let icon = '✅'; // เขียวปกติ
+                        if (diffDays > 15) {
+                            icon = '✴️'; // หรือเลือกเป็นรูปอื่นที่สื่อถึงการค้างไว้นาน เช่น ⚠️ หรือ 🚩
+                        }
+                        
+                        missionStatusIcon = `<span title="${titleText}" style="cursor: help; margin-left: 5px;">${icon}</span><small class="text-danger fw-bold" style="font-size: 0.7rem;">(${diffDays})</small>`;
                     }
                 }
 
