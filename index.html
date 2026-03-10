@@ -674,7 +674,6 @@
             
             let lastDate = null;
 
-            // ฟังก์ชันช่วยจัดการปี
             const normalizeYear = (y) => {
                 if (y < 100) {
                     if (y <= 40) y += 2000;
@@ -684,7 +683,6 @@
                 return y;
             };
 
-            // ฟังก์ชันช่วยหา Index เดือน
             const getMonthIdx = (str) => {
                 let idx = thaiMonths.indexOf(str);
                 if (idx === -1) idx = thaiMonths.findIndex(m => str.includes(m.replace('.', '')));
@@ -692,30 +690,28 @@
                 return idx;
             };
 
-            // รูปแบบที่ 1: วัน เดือน ปี (เช่น 13มี.ค. 69, 1-13มี.ค. 69)
-            const dmyRegex = /(\d{1,2})\s*([ก-๙\.]+)\s*(\d{2,4})/g;
+            // ใช้ Regex ที่รองรับทั้งแบบระบุวันที่ และไม่ระบุวันที่ (เฉพาะเดือน)
+            const combinedRegex = /(?:(\d{1,2})\s*)?([ก-๙\.]+)\s*(\d{2,4})/g;
             let match;
-            while ((match = dmyRegex.exec(notes)) !== null) {
-                let day = parseInt(match[1]);
+            
+            while ((match = combinedRegex.exec(notes)) !== null) {
+                let day = match[1] ? parseInt(match[1]) : null;
                 let monthIdx = getMonthIdx(match[2]);
                 let year = normalizeYear(parseInt(match[3]));
+                
                 if (monthIdx !== -1) {
-                    const date = new Date(year, monthIdx, day);
+                    let date;
+                    if (day) {
+                        date = new Date(year, monthIdx, day);
+                    } else {
+                        // กรณีมาแค่เดือน -> ให้เป็นวันสุดท้ายของเดือนนั้นๆ
+                        date = new Date(year, monthIdx + 1, 0);
+                    }
+                    
                     date.setHours(0, 0, 0, 0);
-                    if (!lastDate || date > lastDate) lastDate = date;
-                }
-            }
-
-            // รูปแบบที่ 2: เดือน ปี (เช่น ก.พ.2569) - กรณีระบุแค่เดือน ให้ถือเป็นวันสุดท้ายของเดือนนั้น
-            const myRegex = /([ก-๙\.]+)\s*(\d{4})/g;
-            while ((match = myRegex.exec(notes)) !== null) {
-                let monthIdx = getMonthIdx(match[1]);
-                let year = normalizeYear(parseInt(match[2]));
-                if (monthIdx !== -1) {
-                    // สร้างวันที่เป็น "วันสุดท้ายของเดือน"
-                    const date = new Date(year, monthIdx + 1, 0);
-                    date.setHours(0, 0, 0, 0);
-                    if (!lastDate || date > lastDate) lastDate = date;
+                    if (!lastDate || date > lastDate) {
+                        lastDate = date;
+                    }
                 }
             }
             
