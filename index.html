@@ -202,7 +202,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ลงคุม):</label>
                         <div id="durationControlFilters" class="d-flex flex-wrap gap-2">
                             <div class="form-check form-check-inline">
@@ -217,7 +217,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ได้รับเอกสาร):</label>
                         <div id="durationReceiptFilters" class="d-flex flex-wrap gap-2">
                             <div class="form-check form-check-inline">
@@ -232,7 +232,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold d-block">กรองตามระยะเวลา (ไม่มีการเปลี่ยนแปลง):</label>
                         <div id="durationModifiedFilters" class="d-flex flex-wrap gap-2">
                             <div class="form-check form-check-inline">
@@ -244,6 +244,24 @@
                                 <label class="form-check-label" for="filterDurationModified60">เกิน 60 วัน 🚨</label>
                             </div>
                             <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationModifiedFilter()">ล้าง</button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-bold d-block">กรองตามสถานะภารกิจ:</label>
+                        <div id="missionFilters" class="d-flex flex-wrap gap-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input mission-filter" type="checkbox" value="ENDED" id="filterMissionEnded" checked>
+                                <label class="form-check-label" for="filterMissionEnded">จบภารกิจแล้ว</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input mission-filter" type="checkbox" value="PROGRESS" id="filterMissionProgress" checked>
+                                <label class="form-check-label" for="filterMissionProgress">ยังไม่จบ</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input mission-filter" type="checkbox" value="NODATE" id="filterMissionNoDate" checked>
+                                <label class="form-check-label" for="filterMissionNoDate">ไม่พบวันที่</label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -328,7 +346,6 @@
                         <option value="อยู่ระหว่างแก้ไข">อยู่ระหว่างแก้ไข</option>
                         <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
                         <option value="ส่งเบิกแล้ว (การเงิน)">ส่งเบิกแล้ว (การเงิน)</option>
-                        <option value="ยังไม่เสร็จสิ้นภารกิจ">ยังไม่เสร็จสิ้นภารกิจ</option>
                         <option value="ยกเลิก/ไม่เบิก">ยกเลิก/ไม่เบิก/เบิกไปแล้ว</option>
                     </select>
                 </div>
@@ -645,6 +662,62 @@
             return `${y}-${m}-${d}`;
         }
 
+        function parseMissionEndDate(notes) {
+            if (!notes) return null;
+            
+            const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const thaiMonthsFull = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            
+            let lastDate = null;
+
+            // ฟังก์ชันช่วยจัดการปี
+            const normalizeYear = (y) => {
+                if (y < 100) {
+                    if (y <= 40) y += 2000;
+                    else y += 2500;
+                }
+                if (y > 2400) y -= 543;
+                return y;
+            };
+
+            // ฟังก์ชันช่วยหา Index เดือน
+            const getMonthIdx = (str) => {
+                let idx = thaiMonths.indexOf(str);
+                if (idx === -1) idx = thaiMonths.findIndex(m => str.includes(m.replace('.', '')));
+                if (idx === -1) idx = thaiMonthsFull.findIndex(m => str.includes(m));
+                return idx;
+            };
+
+            // รูปแบบที่ 1: วัน เดือน ปี (เช่น 13มี.ค. 69, 1-13มี.ค. 69)
+            const dmyRegex = /(\d{1,2})\s*([ก-๙\.]+)\s*(\d{2,4})/g;
+            let match;
+            while ((match = dmyRegex.exec(notes)) !== null) {
+                let day = parseInt(match[1]);
+                let monthIdx = getMonthIdx(match[2]);
+                let year = normalizeYear(parseInt(match[3]));
+                if (monthIdx !== -1) {
+                    const date = new Date(year, monthIdx, day);
+                    date.setHours(0, 0, 0, 0);
+                    if (!lastDate || date > lastDate) lastDate = date;
+                }
+            }
+
+            // รูปแบบที่ 2: เดือน ปี (เช่น ก.พ.2569) - กรณีระบุแค่เดือน ให้ถือเป็นวันสุดท้ายของเดือนนั้น
+            const myRegex = /([ก-๙\.]+)\s*(\d{4})/g;
+            while ((match = myRegex.exec(notes)) !== null) {
+                let monthIdx = getMonthIdx(match[1]);
+                let year = normalizeYear(parseInt(match[2]));
+                if (monthIdx !== -1) {
+                    // สร้างวันที่เป็น "วันสุดท้ายของเดือน"
+                    const date = new Date(year, monthIdx + 1, 0);
+                    date.setHours(0, 0, 0, 0);
+                    if (!lastDate || date > lastDate) lastDate = date;
+                }
+            }
+            
+            return lastDate;
+        }
+
         function formatDateThai(dateStr) {
             const iso = getISODate(dateStr);
             if (!iso) return dateStr || '-';
@@ -763,9 +836,9 @@
 
             // Filter by Date Range (Control Date)
             const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            if (startDate || endDate) {
-                console.log('Filtering by date range:', { startDate, endDate });
+            const endDateRange = document.getElementById('endDate').value;
+            if (startDate || endDateRange) {
+                console.log('Filtering by date range:', { startDate, endDateRange });
                 filteredData = filteredData.filter(item => {
                     const docDate = getISODate(item.controlDate);
                     if (!docDate) {
@@ -774,7 +847,7 @@
                     }
                     
                     const isAfterStart = !startDate || docDate >= startDate;
-                    const isBeforeEnd = !endDate || docDate <= endDate;
+                    const isBeforeEnd = !endDateRange || docDate <= endDateRange;
                     
                     console.log(`Item ${item.bookNum}: docDate=${docDate}, startDate=${startDate}, match=${isAfterStart && isBeforeEnd}`);
 
@@ -784,6 +857,21 @@
                     return false;
                 });
                 console.log('Results after date filter:', filteredData.length);
+            }
+
+            // Filter by Mission Status
+            const checkedMissionStatuses = Array.from(document.querySelectorAll('.mission-filter:checked')).map(cb => cb.value);
+            if (checkedMissionStatuses.length < 3) { // Only filter if not all are checked
+                filteredData = filteredData.filter(item => {
+                    const missionEndDate = parseMissionEndDate(item.originalNotes);
+                    let status = 'NODATE';
+                    if (missionEndDate) {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        status = today >= missionEndDate ? 'ENDED' : 'PROGRESS';
+                    }
+                    return checkedMissionStatuses.includes(status);
+                });
             }
 
             // Filter by search text
@@ -1139,6 +1227,19 @@
                     lastModified: ''
                 };
 
+                // Check for Mission Progress Auto-Step
+                const missionEndDate = parseMissionEndDate(item.originalNotes);
+                let currentStep = tracking.step;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (missionEndDate && today < missionEndDate) {
+                    currentStep = 'ยังไม่เสร็จสิ้นภารกิจ';
+                } else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') {
+                    // หากจบภารกิจแล้ว หรือไม่พบวัน แต่ค่าเดิมใน DB ยังเป็น "ยังไม่เสร็จสิ้นภารกิจ" ให้เคลียร์เป็นว่าง
+                    currentStep = '';
+                }
+
                 // Track items older than 30 days since last modification
                 const daysSinceModified = calculateDaysElapsed(tracking.lastModified);
                 if (daysSinceModified !== null && daysSinceModified >= 30) {
@@ -1150,30 +1251,30 @@
                 
                 // Color coding for steps
                 let badgeClass = 'bg-secondary';
-                if (tracking.step === 'กวบ.') badgeClass = 'bg-warning text-dark';
-                else if (tracking.step === 'ฝบบ.') badgeClass = 'bg-primary';
-                else if (tracking.step === 'ส่งกลับกลุ่ม/ฝ่าย') badgeClass = 'bg-success';
-                else if (tracking.step === 'ยังไม่ได้รับเอกสารตัวจริง') {
+                if (currentStep === 'กวบ.') badgeClass = 'bg-warning text-dark';
+                else if (currentStep === 'ฝบบ.') badgeClass = 'bg-primary';
+                else if (currentStep === 'ส่งกลับกลุ่ม/ฝ่าย') badgeClass = 'bg-success';
+                else if (currentStep === 'ยังไม่ได้รับเอกสารตัวจริง') {
                     badgeClass = 'bg-info text-dark';
                     row.classList.add('table-info');
                 }
-                else if (tracking.step === 'อยู่ระหว่างแก้ไข') {
+                else if (currentStep === 'อยู่ระหว่างแก้ไข') {
                     badgeClass = 'bg-warning text-dark';
                     row.classList.add('table-warning');
                 }
-                else if (tracking.step === 'กำลังดำเนินการ' || tracking.step === 'กำลังดำเนินการเบิก') {
+                else if (currentStep === 'กำลังดำเนินการ' || currentStep === 'กำลังดำเนินการเบิก') {
                     badgeClass = 'bg-primary';
                     row.classList.add('table-primary');
                 }
-                else if (tracking.step === 'ส่งเบิกแล้ว (การเงิน)') {
+                else if (currentStep === 'ส่งเบิกแล้ว (การเงิน)') {
                     badgeClass = 'bg-success';
                     row.classList.add('table-success');
                 }
-                else if (tracking.step === 'ยังไม่เสร็จสิ้นภารกิจ') {
+                else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') {
                     badgeClass = 'bg-dark text-white';
                     row.classList.add('table-secondary');
                 }
-                else if (tracking.step === 'ยกเลิก/ไม่เบิก') {
+                else if (currentStep === 'ยกเลิก/ไม่เบิก') {
                     badgeClass = 'bg-danger';
                     row.classList.add('table-danger');
                 }
@@ -1210,6 +1311,19 @@
                     lastModifiedDisplay = `<span class="text-danger fw-bold">${lastModifiedDisplay} 🕒</span>`;
                 }
 
+                // Check for Mission End Icon
+                let missionStatusIcon = '';
+                if (missionEndDate) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (today >= missionEndDate) {
+                        const diffTime = today.getTime() - missionEndDate.getTime();
+                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        const titleText = diffDays === 0 ? 'จบภารกิจวันนี้' : `จบภารกิจมาแล้ว ${diffDays} วัน`;
+                        missionStatusIcon = `<span title="${titleText}" style="cursor: help; margin-left: 5px;">✅</span><small class="text-danger fw-bold" style="font-size: 0.7rem;">(${diffDays})</small>`;
+                    }
+                }
+
                 row.innerHTML = `
                     <td><input type="checkbox" class="form-check-input row-checkbox" data-key="${key}"></td>
                     <td onclick="openEdit('${key}')">${item.id}</td>
@@ -1221,7 +1335,7 @@
                     <td onclick="openEdit('${key}')">${item.name}</td>
                     <td onclick="openEdit('${key}')">${item.dept}</td>
                     <td onclick="openEdit('${key}')">
-                        <span class="badge ${badgeClass}">${tracking.step || '-'}</span>
+                        <span class="badge ${badgeClass}">${currentStep || '-'}</span>
                         <div style="font-size: 0.75rem; color: #0d6efd; font-weight: bold; margin-top: 2px;">
                             (${lastModifiedDisplay})
                         </div>
@@ -1230,7 +1344,7 @@
                         ${formatDateThai(tracking.location)}
                     </td>
                     <td style="text-align: center;" onclick="openEdit('${key}')">
-                        <strong>${daysFromReceiptDisplay}</strong>
+                        <strong>${daysFromReceiptDisplay}</strong> ${missionStatusIcon}
                     </td>
                     <td class="col-notes" onclick="openEdit('${key}')">
                         <small class="text-danger d-block">${item.status ? '[' + item.status + '] ' : ''}${tracking.notes || ''}</small>
@@ -1364,6 +1478,12 @@
         });
 
         document.querySelectorAll('.step-filter').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                renderTable(document.getElementById('searchInput').value);
+            });
+        });
+
+        document.querySelectorAll('.mission-filter').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 renderTable(document.getElementById('searchInput').value);
             });
