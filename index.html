@@ -77,6 +77,43 @@
         .navbar {
             transition: background-color 0.3s ease;
         }
+
+        @media print {
+            @page {
+                size: landscape;
+                margin: 5mm;
+            }
+            .navbar, .row.mb-3, .collapse, #notificationArea, .btn, .row-checkbox, .th-checkbox, #loading, .modal {
+                display: none !important;
+            }
+            .container-fluid {
+                margin-top: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            #docTable {
+                font-size: 8pt !important;
+                width: 100% !important;
+            }
+            #docTable thead th {
+                background-color: #0070C0 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .status-badge {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            #docTable th:first-child, #docTable td:first-child {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -379,7 +416,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 
     <script>
         const PLANS = {
@@ -1134,34 +1171,98 @@
                 return;
             }
 
-            // ปรับหัวกระดาษให้ชิดขอบบนสุดและประหยัดพื้นที่สูงสุด
+            // สไตล์สำหรับการพิมพ์
+            let printStyle = `
+                <style>
+                    @font-face {
+                        font-family: 'Sarabun';
+                        src: url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap');
+                    }
+                    body { 
+                        font-family: 'Sarabun', sans-serif; 
+                        margin: 0; 
+                        padding: 10mm;
+                        background: white;
+                    }
+                    @page { 
+                        size: landscape; 
+                        margin: 5mm; 
+                    }
+                    .header { 
+                        display: flex; 
+                        justify-content: space-between; 
+                        align-items: center; 
+                        border-bottom: 2px solid #0070C0; 
+                        margin-bottom: 5px;
+                        padding-bottom: 5px;
+                    }
+                    h2 { color: #0070C0; margin: 0; font-size: 18px; }
+                    .filter-info { margin-bottom: 10px; font-size: 10px; color: #333; display: flex; gap: 15px; }
+                    table { width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed; word-wrap: break-word; }
+                    th { 
+                        background-color: #0070C0 !important; 
+                        color: white !important; 
+                        border: 1px solid #004B96; 
+                        padding: 6px 2px; 
+                        text-align: center;
+                        -webkit-print-color-adjust: exact;
+                    }
+                    td { border: 1px solid #D3D3D3; padding: 4px 3px; vertical-align: top; }
+                    .text-center { text-align: center; }
+                    .text-right { text-align: right; }
+                    .badge {
+                        display: inline-block;
+                        padding: 2px 6px;
+                        border-radius: 10px;
+                        font-size: 9px;
+                        color: white;
+                        -webkit-print-color-adjust: exact;
+                    }
+                    .footer-row { background-color: #f8f9fa; font-weight: bold; }
+                    @page {
+                        @bottom-right {
+                            content: "หน้า " counter(page) " / " counter(pages);
+                        }
+                    }
+                    @media print {
+                        body { padding: 0; }
+                    }
+                </style>
+            `;
+
             let htmlContent = `
-                <div style="padding: 0 5mm; background: white; font-family: 'Sarabun', sans-serif; color: black;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #0070C0; margin-bottom: 2px; padding-top: 1mm;">
-                        <h2 style="color: #0070C0; margin: 0; font-size: 16px;">ระบบติดตามเอกสาร - ${PLANS[currentPlan].name}</h2>
-                        <span style="font-size: 9px; color: #666;">วันที่พิมพ์: ${today}</span>
+                <html>
+                <head>
+                    <title>Export PDF - ${PLANS[currentPlan].name}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+                    ${printStyle}
+                </head>
+                <body>
+                    <div class="header">
+                        <h2>ระบบติดตามเอกสาร - ${PLANS[currentPlan].name}</h2>
+                        <span style="font-size: 10px;">วันที่พิมพ์: ${today}</span>
                     </div>
                     
-                    <div style="margin-bottom: 3px; font-size: 8px; color: #333; display: flex; flex-wrap: wrap; gap: 8px;">
+                    <div class="filter-info">
                         <span><strong>เดือน:</strong> ${filterInfo.monthInfo}</span>
                         <span><strong>สถานะ:</strong> ${filterInfo.statusInfo}</span>
                         <span><strong>ฝ่าย:</strong> ${filterInfo.deptInfo}</span>
                     </div>
                     
-                    <table style="width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed;">
+                    <table>
                         <thead>
-                            <tr style="background-color: #0070C0; color: white;">
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 35px;">ลำดับ</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 75px;">เลขหนังสือ</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 75px;">วันที่ลงคุม</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 65px;">จำนวนวัน</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; width: 130px;">ชื่อผู้เบิก</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 55px;">ฝ่าย</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: right; width: 70px;">วงเงิน</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 95px;">ขั้นตอน</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 75px;">วันที่ได้รับ</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 65px;">จบภารกิจมาแล้ว</th>
-                                <th style="border: 1px solid #004B96; padding: 5px; width: auto;">หมายเหตุ</th>
+                            <tr>
+                                <th style="width: 25px;">ลำดับ</th>
+                                <th style="width: 65px;">เลขหนังสือ</th>
+                                <th style="width: 55px;">วันที่ลงคุม</th>
+                                <th style="width: 45px;">จำนวนวัน</th>
+                                <th style="width: 95px;">ชื่อผู้เบิก</th>
+                                <th style="width: 40px;">ฝ่าย</th>
+                                <th style="width: 65px;">วงเงิน</th>
+                                <th style="width: 80px;">ขั้นตอน</th>
+                                <th style="width: 55px;">วันที่ได้รับ</th>
+                                <th style="width: 50px;">จบภารกิจ</th>
+                                <th style="width: auto;">หมายเหตุ</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1177,67 +1278,65 @@
                 const daysElapsed = calculateDaysElapsed(item.controlDate);
                 const daysFromReceipt = calculateDaysElapsed(tracking.location);
                 
-                // กำหนดสี Status Badge ให้เหมือนหน้าเว็บ
-                let badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #6c757d;";
-                if (tracking.step === 'กวบ.') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: #212529; background-color: #ffc107;";
-                else if (tracking.step === 'ฝบบ.') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #0d6efd;";
-                else if (tracking.step === 'ส่งกลับกลุ่ม/ฝ่าย') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #198754;";
-                else if (tracking.step === 'ยังไม่ได้รับเอกสารตัวจริง') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: #212529; background-color: #0dcaf0;";
-                else if (tracking.step === 'อยู่ระหว่างแก้ไข') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: #212529; background-color: #ffc107;";
-                else if (tracking.step === 'กำลังดำเนินการ' || tracking.step === 'กำลังดำเนินการเบิก') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #0d6efd;";
-                else if (tracking.step === 'ส่งเบิกแล้ว (การเงิน)') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #198754;";
-                else if (tracking.step === 'ยังไม่เสร็จสิ้นภารกิจ') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #212529;";
-                else if (tracking.step === 'ยกเลิก/ไม่เบิก') badgeStyle = "padding: 2px 6px; border-radius: 10px; font-size: 8px; color: white; background-color: #dc3545;";
+                let badgeColor = '#6c757d';
+                if (tracking.step === 'กวบ.') badgeColor = '#ffc107; color: black';
+                else if (tracking.step === 'ฝบบ.') badgeColor = '#0d6efd';
+                else if (tracking.step === 'ส่งกลับกลุ่ม/ฝ่าย') badgeColor = '#198754';
+                else if (tracking.step === 'ยังไม่ได้รับเอกสารตัวจริง') badgeColor = '#0dcaf0; color: black';
+                else if (tracking.step === 'อยู่ระหว่างแก้ไข') badgeColor = '#ffc107; color: black';
+                else if (tracking.step === 'กำลังดำเนินการ' || tracking.step === 'กำลังดำเนินการเบิก') badgeColor = '#0d6efd';
+                else if (tracking.step === 'ส่งเบิกแล้ว (การเงิน)') badgeColor = '#198754';
+                else if (tracking.step === 'ยังไม่เสร็จสิ้นภารกิจ') badgeColor = '#212529';
+                else if (tracking.step === 'ยกเลิก/ไม่เบิก') badgeColor = '#dc3545';
 
-                let daysDisplay = daysElapsed !== null ? `${daysElapsed} วัน` : '-';
-                let daysFromReceiptDisplay = daysFromReceipt !== null ? `${daysFromReceipt} วัน` : '-';
-                
                 let notes = tracking.notes || '';
                 if (item.status) notes = `<span style="color: red; font-weight: bold;">[${item.status}]</span> ${notes}`;
-                if (item.originalNotes) notes += (notes ? '<br>' : '') + `<small style="color: #666;">${item.originalNotes}</small>`;
+                if (item.originalNotes) notes += (notes ? '<br>' : '') + `<small style="color: #666; font-size: 9px;">${item.originalNotes}</small>`;
 
                 htmlContent += `
                     <tr>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${item.id}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${item.bookNum}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${formatDateThai(item.controlDate)}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;"><strong>${daysDisplay}</strong></td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px;">${item.name}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${item.dept}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: right;">${item.amount || '-'}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">
-                            <span style="${badgeStyle}">${tracking.step || '-'}</span><br>
-                            <span style="font-size: 7.5px; color: #0d6efd; font-weight: bold;">(${formatDateThai(tracking.lastModified)})</span>
+                        <td class="text-center">${item.id}</td>
+                        <td class="text-center">${item.bookNum}</td>
+                        <td class="text-center">${formatDateThai(item.controlDate)}</td>
+                        <td class="text-center"><strong>${daysElapsed !== null ? daysElapsed + ' วัน' : '-'}</strong></td>
+                        <td>${item.name}</td>
+                        <td class="text-center">${item.dept}</td>
+                        <td class="text-right">${item.amount || '-'}</td>
+                        <td class="text-center">
+                            <span class="badge" style="background-color: ${badgeColor}">${tracking.step || '-'}</span><br>
+                            <small style="font-size: 8px; color: #0d6efd;">(${formatDateThai(tracking.lastModified)})</small>
                         </td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${formatDateThai(tracking.location)}</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;"><strong>${daysFromReceiptDisplay}</strong></td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px;">${notes || '-'}</td>
+                        <td class="text-center">${formatDateThai(tracking.location)}</td>
+                        <td class="text-center"><strong>${daysFromReceipt !== null ? daysFromReceipt + ' วัน' : '-'}</strong></td>
+                        <td style="font-size: 9px;">${notes || '-'}</td>
                     </tr>
                 `;
             });
-            
+
             htmlContent += `
-                    <tr>
-                        <td colspan="6" style="border: 1px solid #D3D3D3; padding: 4px; text-align: right; font-weight: bold;">รวมทั้งสิ้น</td>
-                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: right; font-weight: bold;">${totalSum.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                        <td colspan="4" style="border: 1px solid #D3D3D3; padding: 4px;"></td>
-                    </tr>
-                </tbody></table></div>`;
-            
-            const opt = {
-                margin: 0,
-                filename: `export_${currentPlan}_${new Date().toISOString().split('T')[0]}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, 
-                    useCORS: true, 
-                    backgroundColor: '#ffffff',
-                    letterRendering: true 
-                },
-                jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' }
-            };
-            
-            html2pdf().from(htmlContent).set(opt).save();
+                        <tr class="footer-row">
+                            <td colspan="6" class="text-right">รวมทั้งสิ้น</td>
+                            <td class="text-right">${totalSum.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                            <td colspan="4"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                \x3Cscript>
+                    window.onload = function() {
+                        setTimeout(() => {
+                            window.print();
+                            window.onafterprint = function() { window.close(); };
+                        }, 500);
+                    };
+                \x3C/script>
+                \x3C/body>
+                \x3C/html>
+            `;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.open();
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
         }
 
         function renderTable(filter = '') {
@@ -1644,16 +1743,6 @@
                 saveBtn.innerHTML = originalText;
             }
         }
-
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        renderTable(e.target.value);
-    });
-
-    document.querySelectorAll('.step-filter').forEach(cb => {
-        cb.addEventListener('change', () => {
-            renderTable(document.getElementById('searchInput').value);
-        });
-    });
 
     // Initial load
     switchPlan(currentPlan);
