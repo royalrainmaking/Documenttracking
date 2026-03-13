@@ -318,9 +318,10 @@
                         <th style="width: 90px;">จำนวนวัน</th>
                         <th style="width: 170px;">ชื่อผู้เบิก</th>
                         <th style="width: 50px;">ฝ่าย</th>
+                        <th style="width: 80px;">วงเงิน</th>
                         <th style="width: 110px;">ขั้นตอนปัจจุบัน</th>
                         <th style="width: 60px;">วันที่ได้รับเอกสาร</th>
-                        <th style="width: 90px;">จบภารกิจมาแล้ว</th>
+                        <th style="width: 90px;">จบภารกิจแล้ว</th>
                         <th class="col-notes">หมายเหตุ</th>
                     </tr>
                 </thead>
@@ -548,6 +549,7 @@
                     name: (row['ชื่อผู้เบิก'] || '').toString().trim(),
                     dept: dept,
                     category: row['หมวด'] || '',
+                    amount: (row['วงเงิน'] || '').toString().trim(),
                     originalNotes: row['หมายเหตุ'] || '',
                     status: row['Note'] || ''
                 };
@@ -975,6 +977,7 @@
                     'วันที่ลงคุม': normalizeDateForExport(item.controlDate),
                     'ชื่อผู้เบิก': item.name,
                     'ฝ่าย': item.dept,
+                    'วงเงิน': item.amount || '-',
                     'หมวด': item.category,
                     'ขั้นตอนปัจจุบัน': tracking.step || 'รอการกรอก',
                     'วันที่ได้รับเอกสาร': normalizeDateForExport(tracking.location),
@@ -991,6 +994,11 @@
             }
 
             const filterInfo = getFilterInfo();
+            const totalAmount = exportRows.reduce((sum, row) => {
+                const amount = parseFloat((row['วงเงิน'] || '0').replace(/,/g, '').trim()) || 0;
+                return sum + amount;
+            }, 0);
+
             const wb = XLSX.utils.book_new();
             const headers = Object.keys(exportRows[0]);
             
@@ -1000,7 +1008,9 @@
                 ['ระยะเวลา (วันที่ลงคุม): ' + filterInfo.durationControlInfo, 'ระยะเวลา (วันที่ได้รับเอกสาร): ' + filterInfo.durationReceiptInfo],
                 [],
                 headers,
-                ...exportRows.map(row => headers.map(h => row[h]))
+                ...exportRows.map(row => headers.map(h => row[h])),
+                [],
+                [...new Array(headers.indexOf('วงเงิน')).fill(''), 'รวมทั้งสิ้น', totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })]
             ];
             
             const ws = XLSX.utils.aoa_to_sheet(dataArray, { cellFormula: false });
@@ -1076,19 +1086,20 @@
             }
 
             ws['!cols'] = [
-                { wch: 12 },
-                { wch: 8 },
-                { wch: 15 },
-                { wch: 14 },
-                { wch: 20 },
-                { wch: 12 },
-                { wch: 12 },
-                { wch: 20 },
-                { wch: 14 },
-                { wch: 14 },
-                { wch: 12 },
-                { wch: 20 },
-                { wch: 20 }
+                { wch: 12 }, // แผน
+                { wch: 8 },  // ลำดับ
+                { wch: 15 }, // เลขหนังสือ
+                { wch: 14 }, // วันที่ลงคุม
+                { wch: 20 }, // ชื่อผู้เบิก
+                { wch: 12 }, // ฝ่าย
+                { wch: 15 }, // วงเงิน
+                { wch: 12 }, // หมวด
+                { wch: 20 }, // ขั้นตอนปัจจุบัน
+                { wch: 14 }, // วันที่ได้รับเอกสาร
+                { wch: 14 }, // เปลี่ยนแปลงล่าสุด
+                { wch: 12 }, // สถานะ
+                { wch: 20 }, // หมายเหตุ
+                { wch: 20 }  // หมายเหตุต้นฉบับ
             ];
 
             ws['!rows'] = [
@@ -1146,6 +1157,7 @@
                                 <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 65px;">จำนวนวัน</th>
                                 <th style="border: 1px solid #004B96; padding: 5px; width: 130px;">ชื่อผู้เบิก</th>
                                 <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 55px;">ฝ่าย</th>
+                                <th style="border: 1px solid #004B96; padding: 5px; text-align: right; width: 70px;">วงเงิน</th>
                                 <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 95px;">ขั้นตอน</th>
                                 <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 75px;">วันที่ได้รับ</th>
                                 <th style="border: 1px solid #004B96; padding: 5px; text-align: center; width: 65px;">จบภารกิจมาแล้ว</th>
@@ -1155,7 +1167,11 @@
                         <tbody>
             `;
 
+            let totalSum = 0;
             dataToExport.forEach(item => {
+                const amount = parseFloat((item.amount || '0').replace(/,/g, '').trim()) || 0;
+                totalSum += amount;
+
                 const key = `${currentPlan}-${item.id}`;
                 const tracking = trackingStore[key] || { step: '', location: '', notes: '', lastModified: '' };
                 const daysElapsed = calculateDaysElapsed(item.controlDate);
@@ -1188,6 +1204,7 @@
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;"><strong>${daysDisplay}</strong></td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px;">${item.name}</td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">${item.dept}</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: right;">${item.amount || '-'}</td>
                         <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: center;">
                             <span style="${badgeStyle}">${tracking.step || '-'}</span><br>
                             <span style="font-size: 7.5px; color: #0d6efd; font-weight: bold;">(${formatDateThai(tracking.lastModified)})</span>
@@ -1199,7 +1216,13 @@
                 `;
             });
             
-            htmlContent += `</tbody></table></div>`;
+            htmlContent += `
+                    <tr>
+                        <td colspan="6" style="border: 1px solid #D3D3D3; padding: 4px; text-align: right; font-weight: bold;">รวมทั้งสิ้น</td>
+                        <td style="border: 1px solid #D3D3D3; padding: 4px; text-align: right; font-weight: bold;">${totalSum.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td colspan="4" style="border: 1px solid #D3D3D3; padding: 4px;"></td>
+                    </tr>
+                </tbody></table></div>`;
             
             const opt = {
                 margin: 0,
@@ -1327,7 +1350,7 @@
                     if (today >= missionEndDate) {
                         const diffTime = today.getTime() - missionEndDate.getTime();
                         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                        const titleText = diffDays === 0 ? 'จบภารกิจวันนี้' : `จบภารกิจมาแล้ว ${diffDays} วัน`;
+                        const titleText = diffDays === 0 ? 'จบภารกิจวันนี้' : `จบภารกิจแล้ว ${diffDays} วัน`;
                         
                         // แยกสี icon
                         let icon = '✅'; 
@@ -1350,6 +1373,7 @@
                     </td>
                     <td onclick="openEdit('${key}')">${item.name}</td>
                     <td onclick="openEdit('${key}')">${item.dept}</td>
+                    <td onclick="openEdit('${key}')" style="text-align: right;">${item.amount || '-'}</td>
                     <td onclick="openEdit('${key}')">
                         <span class="badge ${badgeClass}">${currentStep || '-'}</span>
                         <div style="font-size: 0.75rem; color: #0d6efd; font-weight: bold; margin-top: 2px;">
