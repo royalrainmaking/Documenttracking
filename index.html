@@ -628,43 +628,40 @@
             
             dateStr = dateStr.toString().trim();
             const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-            
-            // Handle Thai Month Names with spaces (e.g., "5 ก.พ. 26")
-            if (dateStr.includes(' ')) {
-                const parts = dateStr.split(/\s+/);
-                if (parts.length >= 3) {
-                    let day = parseInt(parts[0]);
-                    let monthIdx = thaiMonths.indexOf(parts[1]);
-                    if (monthIdx === -1) {
-                        monthIdx = thaiMonths.findIndex(m => parts[1].includes(m.replace('.', '')));
-                    }
-                    let year = parseInt(parts[2]);
+            const thaiMonthsFull = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
-                    if (monthIdx !== -1 && !isNaN(day) && !isNaN(year)) {
-                        // Logic: 00-40 is CE, 41-99 is BE
-                        // 24, 25, 26 = 2024, 2025, 2026 (CE)
-                        // 67, 68 = 2567, 2568 (BE)
-                        if (year < 100) {
-                            if (year <= 40) year += 2000; // 24 -> 2024 (CE)
-                            else year += 2500; // 67 -> 2567 (BE)
-                        }
-                        
-                        if (year > 2400) year -= 543; 
-                        
-                        const date = new Date(year, monthIdx, day);
-                        if (!isNaN(date.getTime())) {
-                            const y = date.getFullYear();
-                            const m = String(date.getMonth() + 1).padStart(2, '0');
-                            const d = String(date.getDate()).padStart(2, '0');
-                            return `${y}-${m}-${d}`;
-                        }
+            // 1. Try Regex-based parsing for Thai formats (handles "ว.12มี.ค. 69", "12 มี.ค. 69", "12 มี.ค.2569", etc.)
+            // The regex matches: optional "ว.", day (1-2 digits), optional space, month (short or full), optional space, year (2-4 digits)
+            const regex = /(?:ว\.)?(\d{1,2})\s*(ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s*(\d{2,4})/;
+            const match = dateStr.match(regex);
+            
+            if (match) {
+                let day = parseInt(match[1]);
+                let monthStr = match[2];
+                let year = parseInt(match[3]);
+
+                let monthIdx = thaiMonths.indexOf(monthStr);
+                if (monthIdx === -1) monthIdx = thaiMonthsFull.indexOf(monthStr);
+
+                if (monthIdx !== -1 && !isNaN(day) && !isNaN(year)) {
+                    if (year < 100) {
+                        if (year <= 40) year += 2000; // 24 -> 2024 (CE)
+                        else year += 2500; // 67 -> 2567 (BE)
+                    }
+                    if (year > 2400) year -= 543;
+                    
+                    const date = new Date(year, monthIdx, day);
+                    if (!isNaN(date.getTime())) {
+                        const y = date.getFullYear();
+                        const m = String(date.getMonth() + 1).padStart(2, '0');
+                        const d = String(date.getDate()).padStart(2, '0');
+                        return `${y}-${m}-${d}`;
                     }
                 }
             }
 
-            // Handle multiple separators
+            // Fallback for other formats (e.g., "DD/MM/YYYY" or "YYYY-MM-DD")
             const normalized = dateStr.replace(/[-.]/g, '/');
-
             let date;
             if (normalized.includes('/')) {
                 const parts = normalized.split('/');
@@ -730,7 +727,8 @@
             };
 
             // ใช้ Regex ที่รองรับทั้งแบบระบุวันที่ และไม่ระบุวันที่ (เฉพาะเดือน)
-            const combinedRegex = /(?:(\d{1,2})\s*)?([ก-๙\.]+)\s*(\d{2,4})/g;
+            // เพิ่มการรองรับ prefix "ว."
+            const combinedRegex = /(?:ว\.)?(?:(\d{1,2})\s*)?([ก-๙\.]+)\s*(\d{2,4})/g;
             let match;
             
             while ((match = combinedRegex.exec(notes)) !== null) {
