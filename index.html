@@ -2023,7 +2023,7 @@
 
     function initDashFilters() {
         const catFilter = document.getElementById('dashCategoryFilter');
-        if (!catFilter) return;
+        if (!catFilter || catFilter.tagName !== 'SELECT') return;
         
         // Clear existing except first
         while (catFilter.options.length > 1) {
@@ -2198,7 +2198,10 @@
         document.getElementById('editId').value = key;
         document.getElementById('editStep').value = tracking.step;
         document.getElementById('editNotes').value = tracking.notes || '';
-        datePicker.setDate(tracking.location);
+        
+        if (datePicker) {
+            datePicker.setDate(tracking.location);
+        }
 
         const modal = new bootstrap.Modal(document.getElementById('editModal'));
         modal.show();
