@@ -376,6 +376,28 @@
             </li>
         </ul>
 
+        <div id="tableSummary" class="card shadow-sm border-0 mb-3" style="background-color: #e3f2fd;">
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex gap-4">
+                        <div>
+                            <strong>จำนวนรายการ:</strong> <span id="summaryCount" class="badge bg-primary">0</span> รายการ
+                        </div>
+                        <div>
+                            <strong>วงเงินรวม:</strong> <span id="summaryAmount" class="badge bg-success">0.00</span> บาท
+                        </div>
+                    </div>
+                    <div class="text-muted small">
+                        * ข้อมูลที่แสดงตามตัวกรองปัจจุบัน
+                    </div>
+                </div>
+                <hr class="my-2">
+                <div id="categoryBreakdown" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 small">
+                    <!-- Category breakdown will be here -->
+                </div>
+            </div>
+        </div>
+
         <div id="loading" class="loading-spinner">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
@@ -1762,7 +1784,7 @@
 
             htmlContent += `
                         <tr class="footer-row">
-                            <td colspan="6" class="text-right">รวมทั้งสิ้น</td>
+                            <td colspan="6" class="text-right">รวมทั้งสิ้น (${dataToExport.length.toLocaleString()} รายการ)</td>
                             <td class="text-right">${totalSum.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td colspan="4"></td>
                         </tr>
@@ -1792,8 +1814,22 @@
             
             let filteredData = getFilteredData(filter);
             let overdueCount = 0;
+            let totalAmount = 0;
+            const categoryStats = {};
 
             filteredData.forEach(item => {
+                const amount = parseFloat((item.amount || '0').replace(/,/g, '')) || 0;
+                totalAmount += amount;
+
+                const catCode = (item.category || '').trim();
+                if (catCode) {
+                    if (!categoryStats[catCode]) {
+                        categoryStats[catCode] = { count: 0, amount: 0, name: CATEGORIES[catCode] || 'อื่นๆ' };
+                    }
+                    categoryStats[catCode].count++;
+                    categoryStats[catCode].amount += amount;
+                }
+
                 const key = `${currentPlan}-${item.id}`;
                 const tracking = trackingStore[key] || { 
                     step: '', 
@@ -1946,6 +1982,36 @@
 
             updateNotification(overdueCount);
             setupSelectAllCheckbox();
+
+            // Update summary
+            const summaryCountEl = document.getElementById('summaryCount');
+            const summaryAmountEl = document.getElementById('summaryAmount');
+            if (summaryCountEl) summaryCountEl.innerText = filteredData.length.toLocaleString();
+            if (summaryAmountEl) summaryAmountEl.innerText = totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+
+            // Render category breakdown
+            const breakdownEl = document.getElementById('categoryBreakdown');
+            if (breakdownEl) {
+                const sortedCats = Object.keys(categoryStats).sort();
+                if (sortedCats.length === 0) {
+                    breakdownEl.innerHTML = '<div class="col-12 text-muted">ไม่มีข้อมูลหมวด</div>';
+                } else {
+                    breakdownEl.innerHTML = sortedCats.map(code => {
+                        const stats = categoryStats[code];
+                        return `
+                            <div class="col">
+                                <div class="d-flex flex-column h-100 p-2 bg-white rounded border-start border-4 border-primary shadow-sm">
+                                    <div class="fw-bold text-truncate" title="${code} - ${stats.name}">${code} - ${stats.name}</div>
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <span class="text-primary">${stats.count} รายการ</span>
+                                        <span class="fw-bold text-success">${stats.amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
         }
 
         function updateNotification(count) {
