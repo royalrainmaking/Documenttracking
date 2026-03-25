@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,43 +14,53 @@
             font-family: 'Sarabun', sans-serif;
             background-color: #f8f9fa;
         }
+
         .container-fluid {
             margin-top: 30px;
             padding-left: 20px;
             padding-right: 20px;
         }
+
         .card {
             border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .status-badge {
             font-size: 0.9em;
             padding: 5px 10px;
             border-radius: 20px;
         }
+
         .step-active {
             font-weight: bold;
             color: #0d6efd;
         }
+
         .table-responsive {
             margin-bottom: 20px;
         }
+
         .col-name {
             min-width: 90px;
         }
+
         .col-date {
             min-width: 75px;
             white-space: nowrap;
         }
+
         .col-notes {
             max-width: 150px;
             word-wrap: break-word;
             white-space: normal;
         }
+
         #docTable {
             border-collapse: collapse;
             font-size: 0.85rem;
         }
+
         #docTable thead th {
             background-color: #0070C0;
             color: white;
@@ -59,29 +70,37 @@
             text-align: center;
             font-size: 0.8rem;
         }
+
         #docTable tbody td {
             border: 1px solid #D3D3D3;
             padding: 4px 6px;
         }
+
         #docTable tbody tr {
             cursor: pointer;
         }
+
         #docTable tbody tr:hover {
             background-color: #e9ecef;
         }
+
         .loading-spinner {
             display: none;
             text-align: center;
             padding: 20px;
         }
+
         .navbar {
             transition: background-color 0.3s ease;
         }
+
         .btn-outline-hail {
             color: #6f42c1;
             border-color: #6f42c1;
         }
-        .btn-outline-hail:hover, .btn-outline-hail.active {
+
+        .btn-outline-hail:hover,
+        .btn-outline-hail.active {
             background-color: #6f42c1;
             color: white;
         }
@@ -91,501 +110,587 @@
                 size: landscape;
                 margin: 5mm;
             }
-            .navbar, .row.mb-3, .collapse, #notificationArea, .btn, .row-checkbox, .th-checkbox, #loading, .modal {
+
+            .navbar,
+            .row.mb-3,
+            .collapse,
+            #notificationArea,
+            .btn,
+            .row-checkbox,
+            .th-checkbox,
+            #loading,
+            .modal {
                 display: none !important;
             }
+
             .container-fluid {
                 margin-top: 0 !important;
                 padding: 0 !important;
                 width: 100% !important;
             }
+
             .card {
                 border: none !important;
                 box-shadow: none !important;
                 padding: 0 !important;
             }
+
             #docTable {
                 font-size: 8pt !important;
                 width: 100% !important;
             }
+
             #docTable thead th {
                 background-color: #0070C0 !important;
                 color: white !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
             .status-badge {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            #docTable th:first-child, #docTable td:first-child {
+
+            #docTable th:first-child,
+            #docTable td:first-child {
                 display: none !important;
             }
         }
     </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-    <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1" id="pageTitle">ระบบติดตามเอกสาร - แผน บรู</span>
-        <div class="navbar-nav me-auto">
-            <a class="nav-link active" href="#" id="navTracking" onclick="showPage('tracking')">ตารางติดตาม</a>
-            <a class="nav-link" href="#" id="navDashboard" onclick="showPage('dashboard')">แผนการใช้จ่ายงบประมาณ</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1" id="pageTitle">ระบบติดตามเอกสาร - แผน บรู</span>
+            <div class="navbar-nav me-auto">
+                <a class="nav-link active" href="#" id="navTracking" onclick="showPage('tracking')">ตารางติดตาม</a>
+                <a class="nav-link" href="#" id="navDashboard" onclick="showPage('dashboard')">แผนการใช้จ่ายงบประมาณ</a>
+            </div>
+            <div class="d-flex" id="planButtons">
+                <button class="btn btn-outline-light me-2 btn-sm active" id="btnPlanBru" onclick="switchPlan('bru')">แผน
+                    บรู</button>
+                <button class="btn btn-outline-light me-2 btn-sm" id="btnPlanYut"
+                    onclick="switchPlan('yut')">แผนยุทธ</button>
+                <button class="btn btn-outline-light me-2 btn-sm" id="btnPlanFun"
+                    onclick="switchPlan('fun')">แผนฝุ่น</button>
+                <button class="btn btn-outline-light btn-sm" id="btnPlanHail"
+                    onclick="switchPlan('hail')">แผนลูกเห็บ</button>
+            </div>
         </div>
-        <div class="d-flex" id="planButtons">
-            <button class="btn btn-outline-light me-2 btn-sm active" id="btnPlanBru" onclick="switchPlan('bru')">แผน บรู</button>
-            <button class="btn btn-outline-light me-2 btn-sm" id="btnPlanYut" onclick="switchPlan('yut')">แผนยุทธ</button>
-            <button class="btn btn-outline-light me-2 btn-sm" id="btnPlanFun" onclick="switchPlan('fun')">แผนฝุ่น</button>
-            <button class="btn btn-outline-light btn-sm" id="btnPlanHail" onclick="switchPlan('hail')">แผนลูกเห็บ</button>
+    </nav>
+
+    <div id="notificationArea" class="container-fluid"></div>
+
+    <div id="trackingPage" class="container-fluid">
+        <div class="card p-4">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" id="searchInput" class="form-control"
+                        placeholder="ค้นหาด้วยเลขหนังสือ ชื่อผู้เบิก หรือฝ่าย...">
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-outline-primary me-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#advancedFilter" aria-expanded="false" aria-controls="advancedFilter">
+                        🔍 ตัวกรองขั้นสูง
+                    </button>
+                    <button class="btn btn-outline-danger me-2" onclick="exportToPDF()">พิมพ์ / Export PDF</button>
+                    <button class="btn btn-success" onclick="fetchData()">รีเฟรชข้อมูล</button>
+                </div>
+            </div>
+
+            <div class="collapse mb-3" id="advancedFilter">
+                <div class="card card-body bg-light">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold d-block">กรองตามขั้นตอน:</label>
+                        <div id="stepFilters" class="d-flex flex-wrap gap-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input step-filter" type="checkbox" value="WAITING"
+                                    id="filterWaiting" checked>
+                                <label class="form-check-label" for="filterWaiting">รอการกรอก</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input step-filter" type="checkbox"
+                                    value="ยังไม่ได้รับเอกสารตัวจริง" id="filterNoOriginal" checked>
+                                <label class="form-check-label" for="filterNoOriginal">ยังไม่ได้รับเอกสารตัวจริง</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input step-filter" type="checkbox" value="อยู่ระหว่างแก้ไข"
+                                    id="filterFixing" checked>
+                                <label class="form-check-label" for="filterFixing">อยู่ระหว่างแก้ไข</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input step-filter" type="checkbox" value="กำลังดำเนินการ"
+                                    id="filterProcessing" checked>
+                                <label class="form-check-label" for="filterProcessing">กำลังดำเนินการ</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input step-filter" type="checkbox"
+                                    value="ส่งเบิกแล้ว (การเงิน)" id="filterSentToFinance" checked>
+                                <label class="form-check-label" for="filterSentToFinance">ส่งเบิกแล้ว (การเงิน)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input step-filter" type="checkbox"
+                                    value="ยังไม่เสร็จสิ้นภารกิจ" id="filterNotFinished" checked>
+                                <label class="form-check-label" for="filterNotFinished">ยังไม่เสร็จสิ้นภารกิจ</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input step-filter" type="checkbox" value="ยกเลิก/ไม่เบิก"
+                                    id="filterCancel" checked>
+                                <label class="form-check-label" for="filterCancel">ยกเลิก/ไม่เบิก</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold d-block">กรองตามเดือน:</label>
+                        <div id="monthFilters" class="d-flex flex-wrap gap-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="10"
+                                    id="filterMonth10">
+                                <label class="form-check-label" for="filterMonth10">ต.ค. (ตุลาคม)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="11"
+                                    id="filterMonth11">
+                                <label class="form-check-label" for="filterMonth11">พ.ย. (พฤศจิกายน)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="12"
+                                    id="filterMonth12">
+                                <label class="form-check-label" for="filterMonth12">ธ.ค. (ธันวาคม)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="1"
+                                    id="filterMonth1">
+                                <label class="form-check-label" for="filterMonth1">ม.ค. (มกราคม)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="2"
+                                    id="filterMonth2">
+                                <label class="form-check-label" for="filterMonth2">ก.พ. (กุมภาพันธ์)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="3"
+                                    id="filterMonth3">
+                                <label class="form-check-label" for="filterMonth3">มี.ค. (มีนาคม)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="4"
+                                    id="filterMonth4">
+                                <label class="form-check-label" for="filterMonth4">เม.ย. (เมษายน)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="5"
+                                    id="filterMonth5">
+                                <label class="form-check-label" for="filterMonth5">พ.ค. (พฤษภาคม)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="6"
+                                    id="filterMonth6">
+                                <label class="form-check-label" for="filterMonth6">มิ.ย. (มิถุนายน)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="7"
+                                    id="filterMonth7">
+                                <label class="form-check-label" for="filterMonth7">ก.ค. (กรกฎาคม)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="8"
+                                    id="filterMonth8">
+                                <label class="form-check-label" for="filterMonth8">ส.ค. (สิงหาคม)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input month-filter-checkbox" type="checkbox" value="9"
+                                    id="filterMonth9">
+                                <label class="form-check-label" for="filterMonth9">ก.ย. (กันยายน)</label>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm"
+                                onclick="clearMonthFilter()">ล้างเดือน</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold d-block">กรองตามกลุ่ม:</label>
+                        <div id="groupFilters" class="d-flex flex-wrap gap-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input group-filter" type="checkbox" value="A" id="filterGroupA"
+                                    checked>
+                                <label class="form-check-label" for="filterGroupA">A - ค่าตอบแทน</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input group-filter" type="checkbox" value="B" id="filterGroupB"
+                                    checked>
+                                <label class="form-check-label" for="filterGroupB">B - ค่าใช้สอย</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input group-filter" type="checkbox" value="C" id="filterGroupC"
+                                    checked>
+                                <label class="form-check-label" for="filterGroupC">C - ค่าวัสดุ</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold d-block">กรองตามหมวด:</label>
+                        <div id="categoryFilters" class="d-flex flex-wrap gap-2"
+                            style="max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid #dee2e6; border-radius: 5px; background: white;">
+                            <!-- Categories will be generated by JS -->
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-outline-secondary btn-sm"
+                                onclick="toggleAllCategories(true)">เลือกทั้งหมด</button>
+                            <button class="btn btn-outline-secondary btn-sm"
+                                onclick="toggleAllCategories(false)">ล้างทั้งหมด</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ลงคุม):</label>
+                            <div id="durationControlFilters" class="d-flex flex-wrap gap-2">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input duration-control-checkbox" type="checkbox" value="30"
+                                        id="filterDurationControl30">
+                                    <label class="form-check-label" for="filterDurationControl30">เกิน 30 วัน ⚠️</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input duration-control-checkbox" type="checkbox" value="60"
+                                        id="filterDurationControl60">
+                                    <label class="form-check-label" for="filterDurationControl60">เกิน 60 วัน 🚨</label>
+                                </div>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                    onclick="clearDurationControlFilter()">ล้าง</button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ได้รับเอกสาร):</label>
+                            <div id="durationReceiptFilters" class="d-flex flex-wrap gap-2">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="30"
+                                        id="filterDurationReceipt30">
+                                    <label class="form-check-label" for="filterDurationReceipt30">เกิน 30 วัน ⚠️</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="60"
+                                        id="filterDurationReceipt60">
+                                    <label class="form-check-label" for="filterDurationReceipt60">เกิน 60 วัน 🚨</label>
+                                </div>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                    onclick="clearDurationReceiptFilter()">ล้าง</button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold d-block">กรองตามระยะเวลา (ไม่มีการเปลี่ยนแปลง):</label>
+                            <div id="durationModifiedFilters" class="d-flex flex-wrap gap-2">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input duration-modified-checkbox" type="checkbox"
+                                        value="30" id="filterDurationModified30">
+                                    <label class="form-check-label" for="filterDurationModified30">เกิน 30 วัน
+                                        ⚠️</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input duration-modified-checkbox" type="checkbox"
+                                        value="60" id="filterDurationModified60">
+                                    <label class="form-check-label" for="filterDurationModified60">เกิน 60 วัน
+                                        🚨</label>
+                                </div>
+                                <button class="btn btn-outline-secondary btn-sm"
+                                    onclick="clearDurationModifiedFilter()">ล้าง</button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold d-block">กรองตามสถานะภารกิจ:</label>
+                            <div id="missionFilters" class="d-flex flex-wrap gap-2">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input mission-filter" type="checkbox" value="ENDED"
+                                        id="filterMissionEnded" checked>
+                                    <label class="form-check-label" for="filterMissionEnded">จบภารกิจไม่เกิน 15
+                                        วัน</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input mission-filter" type="checkbox" value="OVER15"
+                                        id="filterMissionOver15" checked>
+                                    <label class="form-check-label" for="filterMissionOver15">จบภารกิจเกิน 15
+                                        วัน</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input mission-filter" type="checkbox" value="PROGRESS"
+                                        id="filterMissionProgress" checked>
+                                    <label class="form-check-label" for="filterMissionProgress">ยังไม่จบ</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input mission-filter" type="checkbox" value="NODATE"
+                                        id="filterMissionNoDate" checked>
+                                    <label class="form-check-label" for="filterMissionNoDate">ไม่พบวันที่</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-0">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-auto">
+                                <label class="form-label fw-bold mb-0">ช่วงวันที่ (วันที่ลงคุม):</label>
+                            </div>
+                            <div class="col-auto">
+                                <input type="text" id="startDate" class="form-control form-control-sm date-filter"
+                                    placeholder="จากวันที่">
+                            </div>
+                            <div class="col-auto">
+                                ถึงวันที่
+                            </div>
+                            <div class="col-auto">
+                                <input type="text" id="endDate" class="form-control form-control-sm date-filter"
+                                    placeholder="ถึงวันที่">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-outline-secondary btn-sm"
+                                    onclick="clearDateFilter()">ล้างวันที่</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs mb-3" id="deptTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="all-tab" onclick="switchTab('All')"
+                        type="button">ทั้งหมด</button>
+                </li>
+            </ul>
+
+            <div id="tableSummary" class="card shadow-sm border-0 mb-3" style="background-color: #e3f2fd;">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="d-flex gap-4">
+                            <div>
+                                <strong>จำนวนรายการ:</strong> <span id="summaryCount" class="badge bg-primary">0</span>
+                                รายการ
+                            </div>
+                            <div>
+                                <strong>วงเงินรวม:</strong> <span id="summaryAmount"
+                                    class="badge bg-success">0.00</span> บาท
+                            </div>
+                        </div>
+                        <div class="text-muted small">
+                            * ข้อมูลที่แสดงตามตัวกรองปัจจุบัน
+                        </div>
+                    </div>
+                    <hr class="my-2">
+                    <div id="categoryBreakdown" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 small">
+                        <!-- Category breakdown will be here -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="loading" class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>กำลังโหลดข้อมูล...</p>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover" id="docTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 30px;">
+                                <input type="checkbox" id="selectAllCheckbox" class="form-check-input">
+                            </th>
+                            <th style="width: 40px;">ลำดับ</th>
+                            <th style="width: 75px;">เลขหนังสือ</th>
+                            <th style="width: 60px;">วันที่ลงคุม</th>
+                            <th style="width: 90px;">จำนวนวัน</th>
+                            <th style="width: 170px;">ชื่อผู้เบิก</th>
+                            <th style="width: 50px;">ฝ่าย</th>
+                            <th style="width: 80px;">วงเงิน</th>
+                            <th style="width: 110px;">ขั้นตอนปัจจุบัน</th>
+                            <th style="width: 60px;">วันที่ได้รับเอกสาร</th>
+                            <th style="width: 90px;">จบภารกิจแล้ว</th>
+                            <th class="col-notes">หมายเหตุ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</nav>
 
-<div id="notificationArea" class="container-fluid"></div>
+    </div>
 
-<div id="trackingPage" class="container-fluid">
-    <div class="card p-4">
+    <div id="dashboardPage" class="container-fluid d-none">
+        <!-- Hidden inputs for Dashboard filtering -->
+        <input type="hidden" id="dashPlanFilter" value="All">
+        <input type="hidden" id="dashGroupFilter" value="All">
+        <input type="hidden" id="dashCategoryFilter" value="All">
+
         <div class="row mb-3">
-            <div class="col-md-6">
-                <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาด้วยเลขหนังสือ ชื่อผู้เบิก หรือฝ่าย...">
-            </div>
-            <div class="col-md-6 text-end">
-                <button class="btn btn-outline-primary me-2" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilter" aria-expanded="false" aria-controls="advancedFilter">
-                    🔍 ตัวกรองขั้นสูง
-                </button>
-                <button class="btn btn-outline-danger me-2" onclick="exportToPDF()">พิมพ์ / Export PDF</button>
-                <button class="btn btn-success" onclick="fetchData()">รีเฟรชข้อมูล</button>
-            </div>
-        </div>
-
-        <div class="collapse mb-3" id="advancedFilter">
-            <div class="card card-body bg-light">
-                <div class="mb-3">
-                    <label class="form-label fw-bold d-block">กรองตามขั้นตอน:</label>
-                    <div id="stepFilters" class="d-flex flex-wrap gap-2">
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input step-filter" type="checkbox" value="WAITING" id="filterWaiting" checked>
-                            <label class="form-check-label" for="filterWaiting">รอการกรอก</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input step-filter" type="checkbox" value="ยังไม่ได้รับเอกสารตัวจริง" id="filterNoOriginal" checked>
-                            <label class="form-check-label" for="filterNoOriginal">ยังไม่ได้รับเอกสารตัวจริง</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input step-filter" type="checkbox" value="อยู่ระหว่างแก้ไข" id="filterFixing" checked>
-                            <label class="form-check-label" for="filterFixing">อยู่ระหว่างแก้ไข</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input step-filter" type="checkbox" value="กำลังดำเนินการ" id="filterProcessing" checked>
-                            <label class="form-check-label" for="filterProcessing">กำลังดำเนินการ</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input step-filter" type="checkbox" value="ส่งเบิกแล้ว (การเงิน)" id="filterSentToFinance" checked>
-                            <label class="form-check-label" for="filterSentToFinance">ส่งเบิกแล้ว (การเงิน)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input step-filter" type="checkbox" value="ยังไม่เสร็จสิ้นภารกิจ" id="filterNotFinished" checked>
-                            <label class="form-check-label" for="filterNotFinished">ยังไม่เสร็จสิ้นภารกิจ</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input step-filter" type="checkbox" value="ยกเลิก/ไม่เบิก" id="filterCancel" checked>
-                            <label class="form-check-label" for="filterCancel">ยกเลิก/ไม่เบิก</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold d-block">กรองตามเดือน:</label>
-                    <div id="monthFilters" class="d-flex flex-wrap gap-2">
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="10" id="filterMonth10">
-                            <label class="form-check-label" for="filterMonth10">ต.ค. (ตุลาคม)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="11" id="filterMonth11">
-                            <label class="form-check-label" for="filterMonth11">พ.ย. (พฤศจิกายน)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="12" id="filterMonth12">
-                            <label class="form-check-label" for="filterMonth12">ธ.ค. (ธันวาคม)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="1" id="filterMonth1">
-                            <label class="form-check-label" for="filterMonth1">ม.ค. (มกราคม)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="2" id="filterMonth2">
-                            <label class="form-check-label" for="filterMonth2">ก.พ. (กุมภาพันธ์)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="3" id="filterMonth3">
-                            <label class="form-check-label" for="filterMonth3">มี.ค. (มีนาคม)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="4" id="filterMonth4">
-                            <label class="form-check-label" for="filterMonth4">เม.ย. (เมษายน)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="5" id="filterMonth5">
-                            <label class="form-check-label" for="filterMonth5">พ.ค. (พฤษภาคม)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="6" id="filterMonth6">
-                            <label class="form-check-label" for="filterMonth6">มิ.ย. (มิถุนายน)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="7" id="filterMonth7">
-                            <label class="form-check-label" for="filterMonth7">ก.ค. (กรกฎาคม)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="8" id="filterMonth8">
-                            <label class="form-check-label" for="filterMonth8">ส.ค. (สิงหาคม)</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input month-filter-checkbox" type="checkbox" value="9" id="filterMonth9">
-                            <label class="form-check-label" for="filterMonth9">ก.ย. (กันยายน)</label>
-                        </div>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="clearMonthFilter()">ล้างเดือน</button>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold d-block">กรองตามกลุ่ม:</label>
-                    <div id="groupFilters" class="d-flex flex-wrap gap-2">
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input group-filter" type="checkbox" value="A" id="filterGroupA" checked>
-                            <label class="form-check-label" for="filterGroupA">A - ค่าตอบแทน</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input group-filter" type="checkbox" value="B" id="filterGroupB" checked>
-                            <label class="form-check-label" for="filterGroupB">B - ค่าใช้สอย</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input group-filter" type="checkbox" value="C" id="filterGroupC" checked>
-                            <label class="form-check-label" for="filterGroupC">C - ค่าวัสดุ</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold d-block">กรองตามหมวด:</label>
-                    <div id="categoryFilters" class="d-flex flex-wrap gap-2" style="max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid #dee2e6; border-radius: 5px; background: white;">
-                        <!-- Categories will be generated by JS -->
-                    </div>
-                    <div class="mt-2">
-                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleAllCategories(true)">เลือกทั้งหมด</button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleAllCategories(false)">ล้างทั้งหมด</button>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ลงคุม):</label>
-                        <div id="durationControlFilters" class="d-flex flex-wrap gap-2">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input duration-control-checkbox" type="checkbox" value="30" id="filterDurationControl30">
-                                <label class="form-check-label" for="filterDurationControl30">เกิน 30 วัน ⚠️</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input duration-control-checkbox" type="checkbox" value="60" id="filterDurationControl60">
-                                <label class="form-check-label" for="filterDurationControl60">เกิน 60 วัน 🚨</label>
-                            </div>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationControlFilter()">ล้าง</button>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold d-block">กรองตามระยะเวลา (วันที่ได้รับเอกสาร):</label>
-                        <div id="durationReceiptFilters" class="d-flex flex-wrap gap-2">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="30" id="filterDurationReceipt30">
-                                <label class="form-check-label" for="filterDurationReceipt30">เกิน 30 วัน ⚠️</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input duration-receipt-checkbox" type="checkbox" value="60" id="filterDurationReceipt60">
-                                <label class="form-check-label" for="filterDurationReceipt60">เกิน 60 วัน 🚨</label>
-                            </div>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationReceiptFilter()">ล้าง</button>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold d-block">กรองตามระยะเวลา (ไม่มีการเปลี่ยนแปลง):</label>
-                        <div id="durationModifiedFilters" class="d-flex flex-wrap gap-2">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input duration-modified-checkbox" type="checkbox" value="30" id="filterDurationModified30">
-                                <label class="form-check-label" for="filterDurationModified30">เกิน 30 วัน ⚠️</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input duration-modified-checkbox" type="checkbox" value="60" id="filterDurationModified60">
-                                <label class="form-check-label" for="filterDurationModified60">เกิน 60 วัน 🚨</label>
-                            </div>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="clearDurationModifiedFilter()">ล้าง</button>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label fw-bold d-block">กรองตามสถานะภารกิจ:</label>
-                        <div id="missionFilters" class="d-flex flex-wrap gap-2">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input mission-filter" type="checkbox" value="ENDED" id="filterMissionEnded" checked>
-                                <label class="form-check-label" for="filterMissionEnded">จบภารกิจไม่เกิน 15 วัน</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input mission-filter" type="checkbox" value="OVER15" id="filterMissionOver15" checked>
-                                <label class="form-check-label" for="filterMissionOver15">จบภารกิจเกิน 15 วัน</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input mission-filter" type="checkbox" value="PROGRESS" id="filterMissionProgress" checked>
-                                <label class="form-check-label" for="filterMissionProgress">ยังไม่จบ</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input mission-filter" type="checkbox" value="NODATE" id="filterMissionNoDate" checked>
-                                <label class="form-check-label" for="filterMissionNoDate">ไม่พบวันที่</label>
+            <div class="col-12">
+                <div class="card p-3 shadow-sm border-0">
+                    <div class="row g-3">
+                        <!-- Filter Plan Buttons -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold mb-2 small text-muted d-block">กรองตามแผน</label>
+                            <div id="dashPlanButtons" class="btn-group btn-group-sm w-100 flex-wrap" role="group">
+                                <button type="button" class="btn btn-outline-primary active"
+                                    onclick="setDashFilter('plan', 'All', this)">ทุกแผน</button>
+                                <button type="button" class="btn btn-outline-success"
+                                    onclick="setDashFilter('plan', 'bru', this)">แผน บรู</button>
+                                <button type="button" class="btn btn-outline-warning text-dark"
+                                    onclick="setDashFilter('plan', 'yut', this)">แผนยุทธ</button>
+                                <button type="button" class="btn btn-outline-danger"
+                                    onclick="setDashFilter('plan', 'fun', this)">แผนฝุ่น</button>
+                                <button type="button" class="btn btn-outline-secondary"
+                                    onclick="setDashFilter('plan', 'hail', this)"
+                                    style="color: #6f42c1; border-color: #6f42c1;">แผนลูกเห็บ</button>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="mb-0">
-                    <div class="row g-2 align-items-center">
-                        <div class="col-auto">
-                            <label class="form-label fw-bold mb-0">ช่วงวันที่ (วันที่ลงคุม):</label>
+                        <!-- Filter Group Buttons -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold mb-2 small text-muted d-block">กรองตามกลุ่มงบประมาณ</label>
+                            <div id="dashGroupButtons" class="btn-group btn-group-sm w-100" role="group">
+                                <button type="button" class="btn btn-outline-primary active"
+                                    onclick="setDashFilter('group', 'All', this)">ทุกกลุ่ม</button>
+                                <button type="button" class="btn btn-outline-info text-dark"
+                                    onclick="setDashFilter('group', 'A', this)">ค่าตอบแทน (A)</button>
+                                <button type="button" class="btn btn-outline-info text-dark"
+                                    onclick="setDashFilter('group', 'B', this)">ค่าใช้สอย (B)</button>
+                                <button type="button" class="btn btn-outline-info text-dark"
+                                    onclick="setDashFilter('group', 'C', this)">ค่าวัสดุ (C)</button>
+                            </div>
                         </div>
-                        <div class="col-auto">
-                            <input type="text" id="startDate" class="form-control form-control-sm date-filter" placeholder="จากวันที่">
-                        </div>
-                        <div class="col-auto">
-                            ถึงวันที่
-                        </div>
-                        <div class="col-auto">
-                            <input type="text" id="endDate" class="form-control form-control-sm date-filter" placeholder="ถึงวันที่">
-                        </div>
-                        <div class="col-auto">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="clearDateFilter()">ล้างวันที่</button>
+                        <!-- Filter Category Buttons -->
+                        <div class="col-12 mt-3">
+                            <label class="form-label fw-bold mb-2 small text-muted d-block">กรองตามหมวด</label>
+                            <div id="dashCategoryButtons" class="d-flex flex-wrap gap-1"
+                                style="max-height: 120px; overflow-y: auto; padding: 5px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                                <button type="button" class="btn btn-sm btn-outline-secondary active dash-cat-btn"
+                                    onclick="setDashFilter('category', 'All', this)">ทุกหมวด</button>
+                                <!-- Category buttons populated by JS -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <ul class="nav nav-tabs mb-3" id="deptTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="all-tab" onclick="switchTab('All')" type="button">ทั้งหมด</button>
-            </li>
-        </ul>
-
-        <div id="tableSummary" class="card shadow-sm border-0 mb-3" style="background-color: #e3f2fd;">
-            <div class="card-body py-2">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div class="d-flex gap-4">
-                        <div>
-                            <strong>จำนวนรายการ:</strong> <span id="summaryCount" class="badge bg-primary">0</span> รายการ
-                        </div>
-                        <div>
-                            <strong>วงเงินรวม:</strong> <span id="summaryAmount" class="badge bg-success">0.00</span> บาท
-                        </div>
-                    </div>
-                    <div class="text-muted small">
-                        * ข้อมูลที่แสดงตามตัวกรองปัจจุบัน
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card p-4">
+                    <h4 class="mb-4">สรุปแผนการใช้จ่ายงบประมาณ</h4>
+                    <div id="dashboardSummary" class="row">
+                        <!-- Summary cards will be here -->
                     </div>
                 </div>
-                <hr class="my-2">
-                <div id="categoryBreakdown" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-2 small">
-                    <!-- Category breakdown will be here -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card p-4">
+                    <h5>สรุปตามกลุ่มงบประมาณ</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>กลุ่ม</th>
+                                    <th class="text-end">จำนวนรายการ</th>
+                                    <th class="text-end">วงเงินรวม</th>
+                                </tr>
+                            </thead>
+                            <tbody id="groupSummaryTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card p-4">
+                    <h5>สรุปตามแผนงาน</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>แผน</th>
+                                    <th class="text-end">จำนวนรายการ</th>
+                                    <th class="text-end">วงเงินรวม</th>
+                                </tr>
+                            </thead>
+                            <tbody id="planSummaryTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card p-4">
+                    <h5>สรุปตามกลุ่ม/ฝ่าย</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>กลุ่ม/ฝ่าย</th>
+                                    <th class="text-end">จำนวนรายการ</th>
+                                    <th class="text-end">วงเงินรวม</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deptSummaryTable"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="loading" class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p>กำลังโหลดข้อมูล...</p>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table table-hover" id="docTable">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 30px;">
-                            <input type="checkbox" id="selectAllCheckbox" class="form-check-input">
-                        </th>
-                        <th style="width: 40px;">ลำดับ</th>
-                        <th style="width: 75px;">เลขหนังสือ</th>
-                        <th style="width: 60px;">วันที่ลงคุม</th>
-                        <th style="width: 90px;">จำนวนวัน</th>
-                        <th style="width: 170px;">ชื่อผู้เบิก</th>
-                        <th style="width: 50px;">ฝ่าย</th>
-                        <th style="width: 80px;">วงเงิน</th>
-                        <th style="width: 110px;">ขั้นตอนปัจจุบัน</th>
-                        <th style="width: 60px;">วันที่ได้รับเอกสาร</th>
-                        <th style="width: 90px;">จบภารกิจแล้ว</th>
-                        <th class="col-notes">หมายเหตุ</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Data will be loaded here -->
-                </tbody>
-            </table>
-        </div>
     </div>
-</div>
 
-</div>
-
-<div id="dashboardPage" class="container-fluid d-none">
-    <!-- Hidden inputs for Dashboard filtering -->
-    <input type="hidden" id="dashPlanFilter" value="All">
-    <input type="hidden" id="dashGroupFilter" value="All">
-    <input type="hidden" id="dashCategoryFilter" value="All">
-    
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="card p-3 shadow-sm border-0">
-                <div class="row g-3">
-                    <!-- Filter Plan Buttons -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold mb-2 small text-muted d-block">กรองตามแผน</label>
-                        <div id="dashPlanButtons" class="btn-group btn-group-sm w-100 flex-wrap" role="group">
-                            <button type="button" class="btn btn-outline-primary active" onclick="setDashFilter('plan', 'All', this)">ทุกแผน</button>
-                            <button type="button" class="btn btn-outline-success" onclick="setDashFilter('plan', 'bru', this)">แผน บรู</button>
-                            <button type="button" class="btn btn-outline-warning text-dark" onclick="setDashFilter('plan', 'yut', this)">แผนยุทธ</button>
-                            <button type="button" class="btn btn-outline-danger" onclick="setDashFilter('plan', 'fun', this)">แผนฝุ่น</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="setDashFilter('plan', 'hail', this)" style="color: #6f42c1; border-color: #6f42c1;">แผนลูกเห็บ</button>
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">อัปเดตสถานะเอกสาร</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editId">
+                    <div class="mb-3">
+                        <label class="form-label">ขั้นตอนปัจจุบัน</label>
+                        <select id="editStep" class="form-select">
+                            <option value="">-- ว่าง (รอการกรอก) --</option>
+                            <option value="ยังไม่ได้รับเอกสารตัวจริง">ยังไม่ได้รับเอกสารตัวจริง</option>
+                            <option value="อยู่ระหว่างแก้ไข">อยู่ระหว่างแก้ไข</option>
+                            <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                            <option value="ส่งเบิกแล้ว (การเงิน)">ส่งเบิกไปที่การเงินแล้ว</option>
+                            <option value="ยกเลิก/ไม่เบิก">ยกเลิก/ไม่เบิก</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">วันที่ได้รับเอกสาร</label>
+                        <div class="input-group">
+                            <input type="text" id="editLocation" class="form-control" placeholder="เลือกวันที่...">
+                            <button class="btn btn-outline-secondary" type="button"
+                                onclick="clearEditDate()">ล้างวันที่</button>
                         </div>
                     </div>
-                    <!-- Filter Group Buttons -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold mb-2 small text-muted d-block">กรองตามกลุ่มงบประมาณ</label>
-                        <div id="dashGroupButtons" class="btn-group btn-group-sm w-100" role="group">
-                            <button type="button" class="btn btn-outline-primary active" onclick="setDashFilter('group', 'All', this)">ทุกกลุ่ม</button>
-                            <button type="button" class="btn btn-outline-info text-dark" onclick="setDashFilter('group', 'A', this)">ค่าตอบแทน (A)</button>
-                            <button type="button" class="btn btn-outline-info text-dark" onclick="setDashFilter('group', 'B', this)">ค่าใช้สอย (B)</button>
-                            <button type="button" class="btn btn-outline-info text-dark" onclick="setDashFilter('group', 'C', this)">ค่าวัสดุ (C)</button>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label">หมายเหตุเพิ่มเติม</label>
+                        <textarea id="editNotes" class="form-control" rows="3"
+                            placeholder="กรอกหมายเหตุเพิ่มเติม..."></textarea>
                     </div>
-                    <!-- Filter Category Buttons -->
-                    <div class="col-12 mt-3">
-                        <label class="form-label fw-bold mb-2 small text-muted d-block">กรองตามหมวด</label>
-                        <div id="dashCategoryButtons" class="d-flex flex-wrap gap-1" style="max-height: 120px; overflow-y: auto; padding: 5px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
-                            <button type="button" class="btn btn-sm btn-outline-secondary active dash-cat-btn" onclick="setDashFilter('category', 'All', this)">ทุกหมวด</button>
-                            <!-- Category buttons populated by JS -->
-                        </div>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" id="saveBtn" class="btn btn-primary" onclick="saveChanges()">บันทึก</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card p-4">
-                <h4 class="mb-4">สรุปแผนการใช้จ่ายงบประมาณ</h4>
-                <div id="dashboardSummary" class="row">
-                    <!-- Summary cards will be here -->
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card p-4">
-                <h5>สรุปตามกลุ่มงบประมาณ</h5>
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>กลุ่ม</th>
-                                <th class="text-end">จำนวนรายการ</th>
-                                <th class="text-end">วงเงินรวม</th>
-                            </tr>
-                        </thead>
-                        <tbody id="groupSummaryTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 mb-4">
-            <div class="card p-4">
-                <h5>สรุปตามแผนงาน</h5>
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>แผน</th>
-                                <th class="text-end">จำนวนรายการ</th>
-                                <th class="text-end">วงเงินรวม</th>
-                            </tr>
-                        </thead>
-                        <tbody id="planSummaryTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card p-4">
-                <h5>สรุปตามกลุ่ม/ฝ่าย</h5>
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>กลุ่ม/ฝ่าย</th>
-                                <th class="text-end">จำนวนรายการ</th>
-                                <th class="text-end">วงเงินรวม</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deptSummaryTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">อัปเดตสถานะเอกสาร</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="editId">
-                <div class="mb-3">
-                    <label class="form-label">ขั้นตอนปัจจุบัน</label>
-                    <select id="editStep" class="form-select">
-                        <option value="">-- ว่าง (รอการกรอก) --</option>
-                        <option value="ยังไม่ได้รับเอกสารตัวจริง">ยังไม่ได้รับเอกสารตัวจริง</option>
-                        <option value="อยู่ระหว่างแก้ไข">อยู่ระหว่างแก้ไข</option>
-                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
-                        <option value="ส่งเบิกแล้ว (การเงิน)">ส่งเบิกไปที่การเงินแล้ว</option>
-                        <option value="ยกเลิก/ไม่เบิก">ยกเลิก/ไม่เบิก</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">วันที่ได้รับเอกสาร</label>
-                    <div class="input-group">
-                        <input type="text" id="editLocation" class="form-control" placeholder="เลือกวันที่...">
-                        <button class="btn btn-outline-secondary" type="button" onclick="clearEditDate()">ล้างวันที่</button>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">หมายเหตุเพิ่มเติม</label>
-                    <textarea id="editNotes" class="form-control" rows="3" placeholder="กรอกหมายเหตุเพิ่มเติม..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                <button type="button" id="saveBtn" class="btn btn-primary" onclick="saveChanges()">บันทึก</button>
-            </div>
-        </div>
-    </div>
-</div>
 
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -658,7 +763,7 @@
         };
 
         const DB_URL = 'https://docs.google.com/spreadsheets/d/1eTamzpY32FwiJBlti4l49Ff6rWzrnKDopvLi0DsdwXY/export?format=csv&gid=0';
-        
+
         let currentPlan = 'bru';
         let documentData = [];
         let allPlansData = {}; // Store data from all plans for dashboard
@@ -689,21 +794,21 @@
         function calculateDaysElapsed(dateStr) {
             const isoDate = getISODate(dateStr);
             if (!isoDate) return null;
-            
+
             const [y, m, d] = isoDate.split('-').map(v => parseInt(v));
             const date = new Date(y, m - 1, d);
             const today = new Date();
-            
+
             const diffTime = today.getTime() - date.getTime();
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
+
             return diffDays;
         }
 
         function switchPlan(planId) {
             currentPlan = planId;
             const plan = PLANS[planId];
-            
+
             // Update UI buttons
             document.getElementById('btnPlanBru').classList.toggle('active', planId === 'bru');
             document.getElementById('btnPlanYut').classList.toggle('active', planId === 'yut');
@@ -713,8 +818,8 @@
             // Update Navbar Color
             const navbar = document.querySelector('.navbar');
             navbar.style.backgroundColor = plan.color;
-            navbar.classList.remove('bg-primary'); 
-            
+            navbar.classList.remove('bg-primary');
+
             // Adjust text color for yellow (yut)
             if (planId === 'yut') {
                 navbar.classList.remove('navbar-dark');
@@ -723,7 +828,7 @@
                 navbar.classList.remove('navbar-light');
                 navbar.classList.add('navbar-dark');
             }
-            
+
             // Update Title
             const title = `ระบบติดตามเอกสาร - ${plan.name}`;
             document.getElementById('pageTitle').innerText = title;
@@ -758,7 +863,7 @@
         async function fetchAllData() {
             document.getElementById('loading').style.display = 'block';
             await fetchDatabase();
-            
+
             const fetchPromises = Object.keys(PLANS).map(async (planId) => {
                 try {
                     const response = await fetch(PLANS[planId].url);
@@ -769,7 +874,7 @@
                                 header: true,
                                 skipEmptyLines: true,
                                 transformHeader: h => h.trim(),
-                                complete: function(results) {
+                                complete: function (results) {
                                     allPlansData[planId] = processRawData(results.data);
                                     resolve();
                                 }
@@ -861,11 +966,11 @@
                     totalItemsCount++;
                 });
             });
-            
+
             // Render summary cards
             const summaryContainer = document.getElementById('dashboardSummary');
             const visiblePlans = Object.keys(planStats).filter(id => planStats[id].count > 0);
-            
+
             if (visiblePlans.length === 0) {
                 summaryContainer.innerHTML = '<div class="col-12 text-center text-muted p-5">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการกรอง</div>';
             } else {
@@ -936,7 +1041,7 @@
                         header: true,
                         skipEmptyLines: true,
                         transformHeader: h => h.trim(),
-                        complete: function(results) {
+                        complete: function (results) {
                             results.data.forEach(row => {
                                 const planId = (row.planId || '').trim();
                                 const id = (row.id || '').trim();
@@ -964,7 +1069,7 @@
             document.getElementById('loading').style.display = 'block';
             // Fetch database sync first
             await fetchDatabase();
-            
+
             try {
                 const response = await fetch(PLANS[currentPlan].url);
                 if (!response.ok) {
@@ -974,17 +1079,17 @@
                     throw new Error('ไม่สามารถโหลดข้อมูลได้');
                 }
                 const csvText = await response.text();
-                
+
                 Papa.parse(csvText, {
                     header: true,
                     skipEmptyLines: true,
                     transformHeader: h => h.trim(),
-                    complete: function(results) {
+                    complete: function (results) {
                         documentData = processRawData(results.data);
                         updateTabs();
                         renderTable();
                     },
-                    error: function(err) {
+                    error: function (err) {
                         console.error('Parsing error:', err);
                         alert('เกิดข้อผิดพลาดในการประมวลผลข้อมูล');
                     }
@@ -1002,7 +1107,7 @@
         function updateTabs() {
             const depts = [...new Set(documentData.map(item => item.dept))].filter(d => d).sort();
             const tabList = document.getElementById('deptTabs');
-            
+
             // Keep "All" tab and remove others
             const allTab = tabList.querySelector('#all-tab').parentElement;
             tabList.innerHTML = '';
@@ -1031,7 +1136,7 @@
 
         function getISODate(dateStr) {
             if (!dateStr || dateStr === '-') return null;
-            
+
             dateStr = dateStr.toString().trim();
             const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
             const thaiMonthsFull = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
@@ -1040,7 +1145,7 @@
             // The regex matches: optional "ว.", day (1-2 digits), optional space, month (short or full), optional space, year (2-4 digits)
             const regex = /(?:ว\.)?(\d{1,2})\s*(ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s*(\d{2,4})/;
             const match = dateStr.match(regex);
-            
+
             if (match) {
                 let day = parseInt(match[1]);
                 let monthStr = match[2];
@@ -1055,7 +1160,7 @@
                         else year += 2500; // 67 -> 2567 (BE)
                     }
                     if (year > 2400) year -= 543;
-                    
+
                     const date = new Date(year, monthIdx, day);
                     if (!isNaN(date.getTime())) {
                         const y = date.getFullYear();
@@ -1072,7 +1177,7 @@
             if (normalized.includes('/')) {
                 const parts = normalized.split('/');
                 if (parts.length < 3) return null;
-                
+
                 let day, month, year;
                 if (parseInt(parts[0]) > 1000) { // YYYY/MM/DD
                     year = parseInt(parts[0]);
@@ -1083,13 +1188,13 @@
                     month = parseInt(parts[1]) - 1;
                     year = parseInt(parts[2]);
                 }
-                
+
                 if (year < 100) {
                     if (year <= 40) year += 2000; // 24 -> 2024 (CE)
                     else year += 2500; // 67 -> 2567 (BE)
                 }
                 if (year > 2400) year -= 543; // Convert BE to CE
-                
+
                 date = new Date(year, month, day);
             } else {
                 // Try standard parsing
@@ -1101,7 +1206,7 @@
             }
 
             if (isNaN(date.getTime())) return null;
-            
+
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const d = String(date.getDate()).padStart(2, '0');
@@ -1110,10 +1215,10 @@
 
         function parseMissionEndDate(notes) {
             if (!notes) return null;
-            
+
             const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
             const thaiMonthsFull = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            
+
             let lastDate = null;
 
             const normalizeYear = (y) => {
@@ -1136,12 +1241,12 @@
             // เพิ่มการรองรับ prefix "ว."
             const combinedRegex = /(?:ว\.)?(?:(\d{1,2})\s*)?([ก-๙\.]+)\s*(\d{2,4})/g;
             let match;
-            
+
             while ((match = combinedRegex.exec(notes)) !== null) {
                 let day = match[1] ? parseInt(match[1]) : null;
                 let monthIdx = getMonthIdx(match[2]);
                 let year = normalizeYear(parseInt(match[3]));
-                
+
                 if (monthIdx !== -1) {
                     let date;
                     if (day) {
@@ -1150,34 +1255,34 @@
                         // กรณีมาแค่เดือน -> ให้เป็นวันสุดท้ายของเดือนนั้นๆ
                         date = new Date(year, monthIdx + 1, 0);
                     }
-                    
+
                     date.setHours(0, 0, 0, 0);
                     if (!lastDate || date > lastDate) {
                         lastDate = date;
                     }
                 }
             }
-            
+
             return lastDate;
         }
 
         function formatDateThai(dateStr) {
             const iso = getISODate(dateStr);
             if (!iso) return dateStr || '-';
-            
+
             const [y, m, d] = iso.split('-').map(v => parseInt(v));
             const date = new Date(y, m - 1, d);
-            
+
             const monthNamesShort = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
             const thaiYear = date.getFullYear() + 543;
             const shortThaiYear = thaiYear.toString().slice(-2);
-            
+
             return `${d} ${monthNamesShort[date.getMonth()]} ${shortThaiYear}`;
         }
 
         function getFilteredData(filter = '') {
             let filteredData = documentData;
-            
+
             // Filter by tab
             if (currentTab !== 'All') {
                 filteredData = filteredData.filter(item => item.dept === currentTab);
@@ -1207,7 +1312,7 @@
             filteredData = filteredData.filter(item => {
                 const key = `${currentPlan}-${item.id}`;
                 const tracking = trackingStore[key] || { step: '' };
-                
+
                 // Check for Mission Progress Auto-Step
                 const missionEndDate = parseMissionEndDate(item.originalNotes);
                 let step = tracking.step;
@@ -1221,7 +1326,7 @@
                 }
 
                 if (!step) step = 'WAITING';
-                
+
                 let filterValue = step;
                 if (step.includes('ยกเลิก/ไม่เบิก')) {
                     filterValue = 'ยกเลิก/ไม่เบิก';
@@ -1238,7 +1343,7 @@
                 } else if (step !== 'WAITING' && step !== 'ยกเลิก/ไม่เบิก') {
                     filterValue = 'กำลังดำเนินการ';
                 }
-                
+
                 return checkedSteps.includes(filterValue);
             });
 
@@ -1257,7 +1362,7 @@
                 filteredData = filteredData.filter(item => {
                     const daysElapsed = calculateDaysElapsed(item.controlDate);
                     if (daysElapsed === null) return false;
-                    
+
                     for (let duration of selectedDurationsFromControl) {
                         const durationDays = parseInt(duration);
                         if (daysElapsed >= durationDays) {
@@ -1275,7 +1380,7 @@
                     const tracking = trackingStore[key] || { step: '', location: '', notes: '' };
                     const daysElapsed = calculateDaysElapsed(tracking.location);
                     if (daysElapsed === null) return false;
-                    
+
                     for (let duration of selectedDurationsFromReceipt) {
                         const durationDays = parseInt(duration);
                         if (daysElapsed >= durationDays) {
@@ -1291,14 +1396,14 @@
                 filteredData = filteredData.filter(item => {
                     const key = `${currentPlan}-${item.id}`;
                     const tracking = trackingStore[key] || { step: '', location: '', notes: '', lastModified: '' };
-                    
+
                     let daysSinceModified = calculateDaysElapsed(tracking.lastModified);
-                    
+
                     // หากไม่มีข้อมูล ให้ถือว่าเป็นเกิน 60 วันไปเลย (ตามโจทย์)
                     if (daysSinceModified === null) {
                         daysSinceModified = 999; // มากกว่า 60
                     }
-                    
+
                     for (let duration of selectedDurationsFromModified) {
                         const durationDays = parseInt(duration);
                         if (daysSinceModified >= durationDays) {
@@ -1320,10 +1425,10 @@
                         console.log(`Skipping item ${item.bookNum} - invalid date: "${item.controlDate}"`);
                         return false;
                     }
-                    
+
                     const isAfterStart = !startDate || docDate >= startDate;
                     const isBeforeEnd = !endDateRange || docDate <= endDateRange;
-                    
+
                     console.log(`Item ${item.bookNum}: docDate=${docDate}, startDate=${startDate}, match=${isAfterStart && isBeforeEnd}`);
 
                     if (isAfterStart && isBeforeEnd) {
@@ -1368,7 +1473,7 @@
 
         function normalizeDateForExport(dateStr) {
             if (!dateStr || dateStr === '-') return '-';
-            
+
             let date;
             if (dateStr.includes('/')) {
                 const parts = dateStr.split('/');
@@ -1395,26 +1500,26 @@
         function getFilterInfo() {
             const monthNamesShort = ["", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
             const monthNamesFull = ["", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            
-            const selectedMonthNames = selectedMonths.length > 0 
+
+            const selectedMonthNames = selectedMonths.length > 0
                 ? selectedMonths.map(m => monthNamesFull[parseInt(m)]).join(', ')
                 : 'ทั้งหมด';
-            
+
             const checkedSteps = Array.from(document.querySelectorAll('.step-filter:checked')).map(cb => {
                 const label = cb.nextElementSibling?.textContent || cb.value;
                 return label;
             }).join(', ');
-            
-            const durationControl = selectedDurationsFromControl.length > 0 
+
+            const durationControl = selectedDurationsFromControl.length > 0
                 ? selectedDurationsFromControl.map(d => `เกิน ${d} วัน`).join(', ')
                 : 'ทั้งหมด';
 
-            const durationReceipt = selectedDurationsFromReceipt.length > 0 
+            const durationReceipt = selectedDurationsFromReceipt.length > 0
                 ? selectedDurationsFromReceipt.map(d => `เกิน ${d} วัน`).join(', ')
                 : 'ทั้งหมด';
-            
+
             const deptInfo = currentTab !== 'All' ? currentTab : 'ทั้งหมด';
-            
+
             return {
                 monthInfo: selectedMonthNames,
                 statusInfo: checkedSteps || 'ทั้งหมด',
@@ -1426,7 +1531,7 @@
 
         function exportToExcel() {
             const checkedRows = Array.from(document.querySelectorAll('.row-checkbox:checked'));
-            
+
             if (checkedRows.length === 0) {
                 alert('กรุณาเลือกแถวที่ต้องการ export');
                 return;
@@ -1436,9 +1541,9 @@
                 const key = checkbox.getAttribute('data-key');
                 const item = documentData.find(d => `${currentPlan}-${d.id}` === key);
                 if (!item) return null;
-                
-                const tracking = trackingStore[key] || { 
-                    step: '', 
+
+                const tracking = trackingStore[key] || {
+                    step: '',
                     location: '',
                     notes: '',
                     lastModified: ''
@@ -1487,7 +1592,7 @@
 
             const wb = XLSX.utils.book_new();
             const headers = Object.keys(exportRows[0]);
-            
+
             const dataArray = [
                 ['ระบบติดตามเอกสาร - ' + PLANS[currentPlan].name],
                 ['เดือน: ' + filterInfo.monthInfo, 'สถานะ: ' + filterInfo.statusInfo, 'ฝ่าย: ' + filterInfo.deptInfo],
@@ -1498,9 +1603,9 @@
                 [],
                 [...new Array(headers.indexOf('วงเงิน')).fill(''), 'รวมทั้งสิ้น', totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })]
             ];
-            
+
             const ws = XLSX.utils.aoa_to_sheet(dataArray, { cellFormula: false });
-            
+
             const titleStyle = {
                 font: { name: 'Sarabun', size: 14, bold: true, color: { rgb: 'FFFFFF' } },
                 fill: { fgColor: { rgb: '0070C0' } },
@@ -1543,18 +1648,18 @@
             };
 
             ws['A1'].s = titleStyle;
-            
+
             for (let c = 0; c < headers.length; c++) {
                 const cellAddress = XLSX.utils.encode_cell({ r: 1, c: c });
                 if (ws[cellAddress]) {
                     ws[cellAddress].s = filterStyle;
                 }
             }
-            
+
             for (let c = 0; c < headers.length; c++) {
                 const cellAddress = XLSX.utils.encode_cell({ r: 4, c: c });
                 ws[cellAddress].s = headerStyle;
-                
+
                 if (!ws[cellAddress]) {
                     ws[cellAddress] = { v: headers[c] };
                 }
@@ -1597,7 +1702,7 @@
             ];
 
             XLSX.utils.book_append_sheet(wb, ws, PLANS[currentPlan].name);
-            
+
             const fileName = `export_${currentPlan}_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(wb, fileName);
         }
@@ -1605,7 +1710,8 @@
         function exportToPDF() {
             const filterInfo = getFilterInfo();
             const today = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-            
+            const themeColor = PLANS[currentPlan].color || '#0070C0';
+
             let dataToExport = [];
             const checkedRows = document.querySelectorAll('.row-checkbox:checked');
             if (checkedRows.length > 0) {
@@ -1619,6 +1725,20 @@
                 alert('ไม่มีข้อมูลให้ส่งออก');
                 return;
             }
+
+            // Group by category and calculate summary
+            const categorySummary = {};
+            let totalAmount = 0;
+            dataToExport.forEach(item => {
+                const amount = parseFloat((item.amount || '0').replace(/,/g, '').trim()) || 0;
+                totalAmount += amount;
+                const catCode = item.category || 'อื่นๆ';
+                if (!categorySummary[catCode]) {
+                    categorySummary[catCode] = { count: 0, amount: 0, name: CATEGORIES[catCode] || 'อื่นๆ' };
+                }
+                categorySummary[catCode].count++;
+                categorySummary[catCode].amount += amount;
+            });
 
             // สไตล์สำหรับการพิมพ์
             let printStyle = `
@@ -1641,17 +1761,69 @@
                         display: flex; 
                         justify-content: space-between; 
                         align-items: center; 
-                        border-bottom: 2px solid #0070C0; 
+                        border-bottom: 2px solid ${themeColor}; 
                         margin-bottom: 5px;
                         padding-bottom: 5px;
                     }
-                    h2 { color: #0070C0; margin: 0; font-size: 18px; }
-                    .filter-info { margin-bottom: 10px; font-size: 10px; color: #333; display: flex; gap: 15px; }
+                    h2 { color: ${themeColor}; margin: 0; font-size: 18px; }
+                    .filter-info { margin-bottom: 5px; font-size: 10px; color: #333; display: flex; gap: 15px; }
+                    .summary-box { 
+                        background-color: #f8f9fa; 
+                        border: 1px solid #dee2e6; 
+                        padding: 12px; 
+                        margin-bottom: 15px; 
+                        font-size: 12px;
+                        border-radius: 6px;
+                    }
+                    .summary-title { 
+                        font-weight: bold; 
+                        font-size: 15px;
+                        color: ${themeColor};
+                        margin-bottom: 10px; 
+                        border-bottom: 2px solid ${themeColor}; 
+                        padding-bottom: 5px; 
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-end;
+                    }
+                    .summary-grid { 
+                        display: grid; 
+                        grid-template-columns: repeat(3, 1fr); 
+                        gap: 8px; 
+                    }
+                    .cat-card {
+                        background-color: #ffffff;
+                        border: 1px solid #dee2e6;
+                        border-left: 4px solid ${themeColor};
+                        border-radius: 4px;
+                        padding: 8px;
+                    }
+                    .cat-card-title {
+                        font-weight: bold;
+                        color: #333;
+                        margin-bottom: 4px;
+                        font-size: 11px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                    .cat-card-stats {
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 12px;
+                    }
+                    .cat-card-count {
+                        color: #555;
+                    }
+                    .cat-card-amount {
+                        font-weight: bold;
+                        color: ${themeColor};
+                    }
                     table { width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed; word-wrap: break-word; }
                     th { 
-                        background-color: #0070C0 !important; 
+                        background-color: ${themeColor} !important; 
                         color: white !important; 
-                        border: 1px solid #004B96; 
+                        border: 1px solid ${themeColor}; 
                         padding: 6px 2px; 
                         text-align: center;
                         -webkit-print-color-adjust: exact;
@@ -1668,6 +1840,7 @@
                         -webkit-print-color-adjust: exact;
                     }
                     .footer-row { background-color: #f8f9fa; font-weight: bold; }
+                    .category-row { background-color: #e9ecef; font-weight: bold; font-size: 10px; }
                     @page {
                         @bottom-right {
                             content: "หน้า " counter(page) " / " counter(pages);
@@ -1675,9 +1848,36 @@
                     }
                     @media print {
                         body { padding: 0; }
+                        .summary-box { border: 1px solid #000; }
                     }
                 </style>
             `;
+
+            let summaryHtml = `
+                <div class="summary-box">
+                    <div class="summary-title">
+                        <div>
+                            <span>จำนวนรายการ: <span style="font-size: 18px; color: ${themeColor}; font-weight: bold;">${dataToExport.length.toLocaleString()}</span> รายการ</span>
+                            <span style="margin-left: 20px;">วงเงินรวม: <span style="font-size: 18px; color: ${themeColor}; font-weight: bold;">${totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> บาท</span>
+                        </div>
+                        <span style="font-size: 10px; font-weight: normal; color: #666;">* ข้อมูลที่แสดงตามตัวกรองปัจจุบัน</span>
+                    </div>
+                    <div class="summary-grid">
+            `;
+
+            Object.keys(categorySummary).sort().forEach(catCode => {
+                const cat = categorySummary[catCode];
+                summaryHtml += `
+                        <div class="cat-card">
+                            <div class="cat-card-title">${catCode} - ${cat.name}</div>
+                            <div class="cat-card-stats">
+                                <span class="cat-card-count">${cat.count.toLocaleString()} รายการ</span>
+                                <span class="cat-card-amount">${cat.amount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </div>
+                        </div>
+                `;
+            });
+            summaryHtml += `</div></div>`;
 
             let htmlContent = `
                 <html>
@@ -1697,6 +1897,8 @@
                         <span><strong>สถานะ:</strong> ${filterInfo.statusInfo}</span>
                         <span><strong>ฝ่าย:</strong> ${filterInfo.deptInfo}</span>
                     </div>
+
+                    ${summaryHtml}
                     
                     <table>
                         <thead>
@@ -1717,89 +1919,93 @@
                         <tbody>
             `;
 
-            let totalSum = 0;
-            dataToExport.forEach(item => {
-                const amount = parseFloat((item.amount || '0').replace(/,/g, '').trim()) || 0;
-                totalSum += amount;
-
-                const key = `${currentPlan}-${item.id}`;
-                const tracking = trackingStore[key] || { step: '', location: '', notes: '', lastModified: '' };
-
-                // Check for Mission Progress Auto-Step
-                const missionEndDate = parseMissionEndDate(item.originalNotes);
-                let currentStep = tracking.step;
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                if (missionEndDate && today < missionEndDate) {
-                    currentStep = 'ยังไม่เสร็จสิ้นภารกิจ';
-                } else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') {
-                    currentStep = '';
-                }
-
-                const daysElapsed = calculateDaysElapsed(item.controlDate);
-                
-                // Calculate days from Mission End
-                let missionEndedDaysDisplay = '-';
-                if (missionEndDate && today >= missionEndDate) {
-                    const diffTime = today.getTime() - missionEndDate.getTime();
-                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                    missionEndedDaysDisplay = `${diffDays} วัน`;
-                }
-                
-                let badgeColor = '#6c757d';
-                if (currentStep === 'กวบ.') badgeColor = '#ffc107; color: black';
-                else if (currentStep === 'ฝบบ.') badgeColor = '#0d6efd';
-                else if (currentStep === 'ส่งกลับกลุ่ม/ฝ่าย') badgeColor = '#198754';
-                else if (currentStep === 'ยังไม่ได้รับเอกสารตัวจริง') badgeColor = '#0dcaf0; color: black';
-                else if (currentStep === 'อยู่ระหว่างแก้ไข') badgeColor = '#ffc107; color: black';
-                else if (currentStep === 'กำลังดำเนินการ' || currentStep === 'กำลังดำเนินการเบิก') badgeColor = '#0d6efd';
-                else if (currentStep === 'ส่งเบิกแล้ว (การเงิน)') badgeColor = '#198754';
-                else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') badgeColor = '#212529';
-                else if (currentStep === 'ยกเลิก/ไม่เบิก') badgeColor = '#dc3545';
-
-                let notes = tracking.notes || '';
-                if (item.status) notes = `<span style="color: red; font-weight: bold;">[${item.status}]</span> ${notes}`;
-                if (item.originalNotes) notes += (notes ? '<br>' : '') + `<small style="color: #666; font-size: 9px;">${item.originalNotes}</small>`;
+            // Group data by category for the table as well
+            const sortedCategories = Object.keys(categorySummary).sort();
+            sortedCategories.forEach(catCode => {
+                const catItems = dataToExport.filter(item => (item.category || 'อื่นๆ') === catCode);
 
                 htmlContent += `
-                    <tr>
-                        <td class="text-center">${item.id}</td>
-                        <td class="text-center">${item.bookNum}</td>
-                        <td class="text-center">${formatDateThai(item.controlDate)}</td>
-                        <td class="text-center"><strong>${daysElapsed !== null ? daysElapsed + ' วัน' : '-'}</strong></td>
-                        <td>${item.name}</td>
-                        <td class="text-center">${item.dept}</td>
-                        <td class="text-right">${item.amount || '-'}</td>
-                        <td class="text-center">
-                            <span class="badge" style="background-color: ${badgeColor}">${currentStep || '-'}</span><br>
-                            <small style="font-size: 8px; color: #0d6efd;">(${formatDateThai(tracking.lastModified)})</small>
-                        </td>
-                        <td class="text-center">${formatDateThai(tracking.location)}</td>
-                        <td class="text-center"><strong>${missionEndedDaysDisplay}</strong></td>
-                        <td style="font-size: 9px;">${notes || '-'}</td>
+                    <tr class="category-row">
+                        <td colspan="11">${catCode} - ${CATEGORIES[catCode] || 'อื่นๆ'} (${catItems.length} รายการ)</td>
                     </tr>
                 `;
+
+                catItems.forEach(item => {
+                    const key = `${currentPlan}-${item.id}`;
+                    const tracking = trackingStore[key] || { step: '', location: '', notes: '', lastModified: '' };
+                    const missionEndDate = parseMissionEndDate(item.originalNotes);
+                    let currentStep = tracking.step;
+                    const todayDate = new Date();
+                    todayDate.setHours(0, 0, 0, 0);
+
+                    if (missionEndDate && todayDate < missionEndDate) {
+                        currentStep = 'ยังไม่เสร็จสิ้นภารกิจ';
+                    } else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') {
+                        currentStep = '';
+                    }
+
+                    const daysElapsed = calculateDaysElapsed(item.controlDate);
+                    let missionEndedDaysDisplay = '-';
+                    if (missionEndDate && todayDate >= missionEndDate) {
+                        const diffTime = todayDate.getTime() - missionEndDate.getTime();
+                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        missionEndedDaysDisplay = `${diffDays} วัน`;
+                    }
+
+                    let badgeColor = '#6c757d';
+                    if (currentStep === 'กวบ.') badgeColor = '#ffc107; color: black';
+                    else if (currentStep === 'ฝบบ.') badgeColor = '#0d6efd';
+                    else if (currentStep === 'ส่งกลับกลุ่ม/ฝ่าย') badgeColor = '#198754';
+                    else if (currentStep === 'ยังไม่ได้รับเอกสารตัวจริง') badgeColor = '#0dcaf0; color: black';
+                    else if (currentStep === 'อยู่ระหว่างแก้ไข') badgeColor = '#ffc107; color: black';
+                    else if (currentStep === 'กำลังดำเนินการ' || currentStep === 'กำลังดำเนินการเบิก') badgeColor = '#0d6efd';
+                    else if (currentStep === 'ส่งเบิกแล้ว (การเงิน)') badgeColor = '#198754';
+                    else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') badgeColor = '#212529';
+                    else if (currentStep === 'ยกเลิก/ไม่เบิก') badgeColor = '#dc3545';
+
+                    let notes = tracking.notes || '';
+                    if (item.status) notes = `<span style="color: red; font-weight: bold;">[${item.status}]</span> ${notes}`;
+                    if (item.originalNotes) notes += (notes ? '<br>' : '') + `<small style="color: #666; font-size: 9px;">${item.originalNotes}</small>`;
+
+                    htmlContent += `
+                        <tr>
+                            <td class="text-center">${item.id}</td>
+                            <td class="text-center">${item.bookNum}</td>
+                            <td class="text-center">${formatDateThai(item.controlDate)}</td>
+                            <td class="text-center"><strong>${daysElapsed !== null ? daysElapsed + ' วัน' : '-'}</strong></td>
+                            <td>${item.name}</td>
+                            <td class="text-center">${item.dept}</td>
+                            <td class="text-right">${item.amount || '-'}</td>
+                            <td class="text-center">
+                                <span class="badge" style="background-color: ${badgeColor}">${currentStep || '-'}</span><br>
+                                <small style="font-size: 8px; color: #0d6efd;">(${formatDateThai(tracking.lastModified)})</small>
+                            </td>
+                            <td class="text-center">${formatDateThai(tracking.location)}</td>
+                            <td class="text-center"><strong>${missionEndedDaysDisplay}</strong></td>
+                            <td style="font-size: 9px;">${notes || '-'}</td>
+                        </tr>
+                    `;
+                });
             });
 
             htmlContent += `
                         <tr class="footer-row">
                             <td colspan="6" class="text-right">รวมทั้งสิ้น (${dataToExport.length.toLocaleString()} รายการ)</td>
-                            <td class="text-right">${totalSum.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                            <td class="text-right">${totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td colspan="4"></td>
                         </tr>
                     </tbody>
                 </table>
-                \x3Cscript>
+                <${'script'}>
                     window.onload = function() {
                         setTimeout(() => {
                             window.print();
                             window.onafterprint = function() { window.close(); };
                         }, 500);
                     };
-                \x3C/script>
-                \x3C/body>
-                \x3C/html>
+                <${'/script'}>
+                <${'/body'}>
+                <${'/html'}>
             `;
 
             const printWindow = window.open('', '_blank');
@@ -1811,7 +2017,7 @@
         function renderTable(filter = '') {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-            
+
             let filteredData = getFilteredData(filter);
             let overdueCount = 0;
             let totalAmount = 0;
@@ -1831,8 +2037,8 @@
                 }
 
                 const key = `${currentPlan}-${item.id}`;
-                const tracking = trackingStore[key] || { 
-                    step: '', 
+                const tracking = trackingStore[key] || {
+                    step: '',
                     location: '',
                     notes: '',
                     lastModified: ''
@@ -1859,7 +2065,7 @@
 
                 const row = document.createElement('tr');
                 row.setAttribute('data-key', key);
-                
+
                 // Color coding for steps
                 let badgeClass = 'bg-secondary';
                 if (currentStep === 'กวบ.') badgeClass = 'bg-warning text-dark';
@@ -1892,7 +2098,7 @@
 
                 const daysElapsed = calculateDaysElapsed(item.controlDate);
                 let daysDisplay = '-';
-                
+
                 if (daysElapsed !== null) {
                     let icon = '';
                     if (daysElapsed >= 60) {
@@ -1905,7 +2111,7 @@
 
                 const daysElapsedFromReceipt = calculateDaysElapsed(tracking.location);
                 let daysFromReceiptDisplay = '-';
-                
+
                 if (daysElapsedFromReceipt !== null) {
                     let icon = '';
                     if (daysElapsedFromReceipt >= 60) {
@@ -1925,7 +2131,7 @@
                 // Check for Mission End Icon and Days Ended
                 let missionStatusIcon = '';
                 let missionEndedDaysDisplay = '-';
-                
+
                 if (missionEndDate) {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
@@ -1933,13 +2139,13 @@
                         const diffTime = today.getTime() - missionEndDate.getTime();
                         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                         const titleText = diffDays === 0 ? 'จบภารกิจวันนี้' : `จบภารกิจแล้ว ${diffDays} วัน`;
-                        
+
                         // แยกสี icon
-                        let icon = '✅'; 
+                        let icon = '✅';
                         if (diffDays > 15) {
-                            icon = '✴️'; 
+                            icon = '✴️';
                         }
-                        
+
                         missionStatusIcon = `<span title="${titleText}" style="cursor: help; margin-left: 5px;">${icon}</span>`;
                         missionEndedDaysDisplay = `<strong class="text-danger">${diffDays} วัน</strong>`;
                     }
@@ -1973,10 +2179,10 @@
                         ${item.originalNotes || '-'}
                     </td>
                 `;
-                
+
                 const checkboxCell = row.querySelector('td:first-child');
-                checkboxCell.onclick = function(e) { e.stopPropagation(); };
-                
+                checkboxCell.onclick = function (e) { e.stopPropagation(); };
+
                 tbody.appendChild(row);
             });
 
@@ -2028,258 +2234,258 @@
             }
         }
 
-    function setupSelectAllCheckbox() {
-        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        function setupSelectAllCheckbox() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
 
-        selectAllCheckbox.addEventListener('change', function() {
+            selectAllCheckbox.addEventListener('change', function () {
+                rowCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+
             rowCheckboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
+                checkbox.addEventListener('change', function () {
+                    const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
+                    const someChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
+
+                    selectAllCheckbox.checked = allChecked;
+                    selectAllCheckbox.indeterminate = someChecked && !allChecked;
+                });
             });
-        });
+        }
 
-        rowCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
-                const someChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
-                
-                selectAllCheckbox.checked = allChecked;
-                selectAllCheckbox.indeterminate = someChecked && !allChecked;
-            });
-        });
-    }
+        let datePicker;
+        let startPicker, endPicker;
 
-    let datePicker;
-    let startPicker, endPicker;
+        function initCategoryFilters() {
+            const container = document.getElementById('categoryFilters');
+            const checkedGroups = Array.from(document.querySelectorAll('.group-filter:checked')).map(cb => cb.value);
 
-    function initCategoryFilters() {
-        const container = document.getElementById('categoryFilters');
-        const checkedGroups = Array.from(document.querySelectorAll('.group-filter:checked')).map(cb => cb.value);
-        
-        container.innerHTML = '';
-        Object.keys(CATEGORIES).sort().forEach(code => {
-            const groupPrefix = code.charAt(0).toUpperCase();
-            if (checkedGroups.length === 0 || checkedGroups.includes(groupPrefix)) {
-                const div = document.createElement('div');
-                div.className = 'form-check form-check-inline';
-                div.innerHTML = `
+            container.innerHTML = '';
+            Object.keys(CATEGORIES).sort().forEach(code => {
+                const groupPrefix = code.charAt(0).toUpperCase();
+                if (checkedGroups.length === 0 || checkedGroups.includes(groupPrefix)) {
+                    const div = document.createElement('div');
+                    div.className = 'form-check form-check-inline';
+                    div.innerHTML = `
                     <input class="form-check-input category-filter" type="checkbox" value="${code}" id="filterCat${code}" checked>
                     <label class="form-check-label" for="filterCat${code}">${code} - ${CATEGORIES[code]}</label>
                 `;
-                container.appendChild(div);
+                    container.appendChild(div);
+                }
+            });
+
+            // Add event listeners to new checkboxes
+            document.querySelectorAll('.category-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    renderTable(document.getElementById('searchInput').value);
+                });
+            });
+
+            renderTable(document.getElementById('searchInput').value);
+        }
+
+        function toggleAllCategories(checked) {
+            document.querySelectorAll('.category-filter').forEach(checkbox => {
+                checkbox.checked = checked;
+            });
+            renderTable(document.getElementById('searchInput').value);
+        }
+
+        function initDashFilters() {
+            const catFilter = document.getElementById('dashCategoryFilter');
+            if (!catFilter || catFilter.tagName !== 'SELECT') return;
+
+            // Clear existing except first
+            while (catFilter.options.length > 1) {
+                catFilter.remove(1);
             }
-        });
 
-        // Add event listeners to new checkboxes
-        document.querySelectorAll('.category-filter').forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                renderTable(document.getElementById('searchInput').value);
+            Object.keys(CATEGORIES).sort().forEach(code => {
+                const option = document.createElement('option');
+                option.value = code;
+                option.text = `${code} - ${CATEGORIES[code]}`;
+                catFilter.add(option);
             });
-        });
-        
-        renderTable(document.getElementById('searchInput').value);
-    }
-
-    function toggleAllCategories(checked) {
-        document.querySelectorAll('.category-filter').forEach(checkbox => {
-            checkbox.checked = checked;
-        });
-        renderTable(document.getElementById('searchInput').value);
-    }
-
-    function initDashFilters() {
-        const catFilter = document.getElementById('dashCategoryFilter');
-        if (!catFilter || catFilter.tagName !== 'SELECT') return;
-        
-        // Clear existing except first
-        while (catFilter.options.length > 1) {
-            catFilter.remove(1);
         }
-        
-        Object.keys(CATEGORIES).sort().forEach(code => {
-            const option = document.createElement('option');
-            option.value = code;
-            option.text = `${code} - ${CATEGORIES[code]}`;
-            catFilter.add(option);
-        });
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initCategoryFilters();
-        initDashFilters();
+        document.addEventListener('DOMContentLoaded', () => {
+            initCategoryFilters();
+            initDashFilters();
 
-        document.querySelectorAll('.group-filter').forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                initCategoryFilters();
+            document.querySelectorAll('.group-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    initCategoryFilters();
+                });
+            });
+
+            datePicker = flatpickr("#editLocation", {
+                locale: "th",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "j M y",
+            });
+
+            const commonDateConfig = {
+                locale: "th",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "j M y",
+                onChange: function () {
+                    renderTable(document.getElementById('searchInput').value);
+                }
+            };
+
+            startPicker = flatpickr("#startDate", commonDateConfig);
+            endPicker = flatpickr("#endDate", commonDateConfig);
+
+            document.querySelectorAll('.month-filter-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const month = this.value;
+                    if (this.checked) {
+                        if (!selectedMonths.includes(month)) {
+                            selectedMonths.push(month);
+                        }
+                    } else {
+                        selectedMonths = selectedMonths.filter(m => m !== month);
+                    }
+                    renderTable(document.getElementById('searchInput').value);
+                });
+            });
+
+            document.querySelectorAll('.duration-control-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const duration = this.value;
+                    if (this.checked) {
+                        if (!selectedDurationsFromControl.includes(duration)) {
+                            selectedDurationsFromControl.push(duration);
+                        }
+                    } else {
+                        selectedDurationsFromControl = selectedDurationsFromControl.filter(d => d !== duration);
+                    }
+                    renderTable(document.getElementById('searchInput').value);
+                });
+            });
+
+            document.querySelectorAll('.duration-receipt-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const duration = this.value;
+                    if (this.checked) {
+                        if (!selectedDurationsFromReceipt.includes(duration)) {
+                            selectedDurationsFromReceipt.push(duration);
+                        }
+                    } else {
+                        selectedDurationsFromReceipt = selectedDurationsFromReceipt.filter(d => d !== duration);
+                    }
+                    renderTable(document.getElementById('searchInput').value);
+                });
+            });
+
+            document.querySelectorAll('.duration-modified-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const duration = this.value;
+                    if (this.checked) {
+                        if (!selectedDurationsFromModified.includes(duration)) {
+                            selectedDurationsFromModified.push(duration);
+                        }
+                    } else {
+                        selectedDurationsFromModified = selectedDurationsFromModified.filter(d => d !== duration);
+                    }
+                    renderTable(document.getElementById('searchInput').value);
+                });
+            });
+
+            document.querySelectorAll('.step-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    renderTable(document.getElementById('searchInput').value);
+                });
+            });
+
+            document.querySelectorAll('.mission-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    renderTable(document.getElementById('searchInput').value);
+                });
+            });
+
+            document.getElementById('searchInput').addEventListener('input', function () {
+                renderTable(this.value);
             });
         });
 
-        datePicker = flatpickr("#editLocation", {
-            locale: "th",
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "j M y",
-        });
+        function clearDateFilter() {
+            startPicker.clear();
+            endPicker.clear();
+            renderTable(document.getElementById('searchInput').value);
+        }
 
-        const commonDateConfig = {
-            locale: "th",
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "j M y",
-            onChange: function() {
-                renderTable(document.getElementById('searchInput').value);
+        function clearMonthFilter() {
+            selectedMonths = [];
+            document.querySelectorAll('.month-filter-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            renderTable(document.getElementById('searchInput').value);
+        }
+
+        function clearDurationControlFilter() {
+            selectedDurationsFromControl = [];
+            document.querySelectorAll('.duration-control-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            renderTable(document.getElementById('searchInput').value);
+        }
+
+        function clearDurationReceiptFilter() {
+            selectedDurationsFromReceipt = [];
+            document.querySelectorAll('.duration-receipt-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            renderTable(document.getElementById('searchInput').value);
+        }
+
+        function clearDurationModifiedFilter() {
+            selectedDurationsFromModified = [];
+            document.querySelectorAll('.duration-modified-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            renderTable(document.getElementById('searchInput').value);
+        }
+
+        function clearEditDate() {
+            if (datePicker) {
+                datePicker.clear();
             }
-        };
-
-        startPicker = flatpickr("#startDate", commonDateConfig);
-        endPicker = flatpickr("#endDate", commonDateConfig);
-
-        document.querySelectorAll('.month-filter-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const month = this.value;
-                if (this.checked) {
-                    if (!selectedMonths.includes(month)) {
-                        selectedMonths.push(month);
-                    }
-                } else {
-                    selectedMonths = selectedMonths.filter(m => m !== month);
-                }
-                renderTable(document.getElementById('searchInput').value);
-            });
-        });
-
-        document.querySelectorAll('.duration-control-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const duration = this.value;
-                if (this.checked) {
-                    if (!selectedDurationsFromControl.includes(duration)) {
-                        selectedDurationsFromControl.push(duration);
-                    }
-                } else {
-                    selectedDurationsFromControl = selectedDurationsFromControl.filter(d => d !== duration);
-                }
-                renderTable(document.getElementById('searchInput').value);
-            });
-        });
-
-        document.querySelectorAll('.duration-receipt-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const duration = this.value;
-                if (this.checked) {
-                    if (!selectedDurationsFromReceipt.includes(duration)) {
-                        selectedDurationsFromReceipt.push(duration);
-                    }
-                } else {
-                    selectedDurationsFromReceipt = selectedDurationsFromReceipt.filter(d => d !== duration);
-                }
-                renderTable(document.getElementById('searchInput').value);
-            });
-        });
-
-        document.querySelectorAll('.duration-modified-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const duration = this.value;
-                if (this.checked) {
-                    if (!selectedDurationsFromModified.includes(duration)) {
-                        selectedDurationsFromModified.push(duration);
-                    }
-                } else {
-                    selectedDurationsFromModified = selectedDurationsFromModified.filter(d => d !== duration);
-                }
-                renderTable(document.getElementById('searchInput').value);
-            });
-        });
-
-        document.querySelectorAll('.step-filter').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                renderTable(document.getElementById('searchInput').value);
-            });
-        });
-
-        document.querySelectorAll('.mission-filter').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                renderTable(document.getElementById('searchInput').value);
-            });
-        });
-
-        document.getElementById('searchInput').addEventListener('input', function() {
-            renderTable(this.value);
-        });
-    });
-
-    function clearDateFilter() {
-        startPicker.clear();
-        endPicker.clear();
-        renderTable(document.getElementById('searchInput').value);
-    }
-
-    function clearMonthFilter() {
-        selectedMonths = [];
-        document.querySelectorAll('.month-filter-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        renderTable(document.getElementById('searchInput').value);
-    }
-
-    function clearDurationControlFilter() {
-        selectedDurationsFromControl = [];
-        document.querySelectorAll('.duration-control-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        renderTable(document.getElementById('searchInput').value);
-    }
-
-    function clearDurationReceiptFilter() {
-        selectedDurationsFromReceipt = [];
-        document.querySelectorAll('.duration-receipt-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        renderTable(document.getElementById('searchInput').value);
-    }
-
-    function clearDurationModifiedFilter() {
-        selectedDurationsFromModified = [];
-        document.querySelectorAll('.duration-modified-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        renderTable(document.getElementById('searchInput').value);
-    }
-
-    function clearEditDate() {
-        if (datePicker) {
-            datePicker.clear();
-        }
-    }
-
-    function openEdit(key) {
-        const item = documentData.find(d => `${currentPlan}-${d.id}` === key);
-        if (!item) return;
-
-        const tracking = trackingStore[key] || { 
-            step: '', 
-            location: '',
-            notes: ''
-        };
-
-        document.getElementById('editId').value = key;
-        document.getElementById('editStep').value = tracking.step;
-        document.getElementById('editNotes').value = tracking.notes || '';
-        
-        if (datePicker) {
-            datePicker.setDate(tracking.location);
         }
 
-        const modal = new bootstrap.Modal(document.getElementById('editModal'));
-        modal.show();
-    }
+        function openEdit(key) {
+            const item = documentData.find(d => `${currentPlan}-${d.id}` === key);
+            if (!item) return;
+
+            const tracking = trackingStore[key] || {
+                step: '',
+                location: '',
+                notes: ''
+            };
+
+            document.getElementById('editId').value = key;
+            document.getElementById('editStep').value = tracking.step;
+            document.getElementById('editNotes').value = tracking.notes || '';
+
+            if (datePicker) {
+                datePicker.setDate(tracking.location);
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }
 
         // !!! นำ URL ที่ได้จากการ Deploy Google Apps Script มาวางที่นี่ !!!
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzr-ec0UK90Q_8r0m7RJuzWORKf6J0323ucfTDsnV8oUTIfS5MM1xRQ6EQb9uSsaKEPgw/exec'; 
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzr-ec0UK90Q_8r0m7RJuzWORKf6J0323ucfTDsnV8oUTIfS5MM1xRQ6EQb9uSsaKEPgw/exec';
 
         async function saveChanges() {
             const saveBtn = document.getElementById('saveBtn');
             const originalText = saveBtn.innerHTML;
-            
+
             const key = document.getElementById('editId').value;
             const step = document.getElementById('editStep').value;
             const location = document.getElementById('editLocation').value;
@@ -2304,12 +2510,12 @@
                     });
                     console.log('บันทึกลง Database สำเร็จ');
                 }
-                
+
                 // ปิด Modal เมื่อบันทึกเสร็จ
                 const modalElement = document.getElementById('editModal');
                 const modal = bootstrap.Modal.getInstance(modalElement);
                 modal.hide();
-                
+
                 renderTable(document.getElementById('searchInput').value);
             } catch (error) {
                 console.error('ไม่สามารถบันทึกลง Database ได้:', error);
@@ -2321,9 +2527,10 @@
             }
         }
 
-    // Initial load
-    switchPlan(currentPlan);
-</script>
+        // Initial load
+        switchPlan(currentPlan);
+    </script>
 
 </body>
+
 </html>
