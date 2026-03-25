@@ -105,6 +105,38 @@
             color: white;
         }
 
+        .bg-purple {
+            background-color: #6f42c1 !important;
+            color: white !important;
+        }
+
+        .table-purple {
+            background-color: #f3e5f5 !important;
+        }
+
+        /* Status row bars */
+        tr.table-primary td:first-child { border-left: 5px solid #0d6efd !important; }
+        tr.table-success td:first-child { border-left: 5px solid #198754 !important; }
+        tr.table-warning td:first-child { border-left: 5px solid #ffc107 !important; }
+        tr.table-danger td:first-child { border-left: 5px solid #dc3545 !important; }
+        tr.table-info td:first-child { border-left: 5px solid #0dcaf0 !important; }
+        tr.table-purple td:first-child { border-left: 5px solid #6f42c1 !important; }
+        tr.table-secondary td:first-child { border-left: 5px solid #6c757d !important; }
+
+        .status-date {
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        tr.table-primary .status-date { color: #0d6efd !important; }
+        tr.table-success .status-date { color: #198754 !important; }
+        tr.table-warning .status-date { color: #856404 !important; }
+        tr.table-danger .status-date { color: #842029 !important; }
+        tr.table-info .status-date { color: #055160 !important; }
+        tr.table-purple .status-date { color: #4a148c !important; }
+        tr.table-secondary .status-date { color: #6c757d !important; }
+
         @media print {
             @page {
                 size: landscape;
@@ -230,6 +262,11 @@
                                 <input class="form-check-input step-filter" type="checkbox"
                                     value="ส่งเบิกแล้ว (การเงิน)" id="filterSentToFinance" checked>
                                 <label class="form-check-label" for="filterSentToFinance">ส่งเบิกแล้ว (การเงิน)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input step-filter" type="checkbox"
+                                    value="ส่งไปยังกลุ่ม/ฝ่าย" id="filterSentToDept" checked>
+                                <label class="form-check-label" for="filterSentToDept">ส่งไปยังกลุ่ม/ฝ่าย</label>
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input step-filter" type="checkbox"
@@ -666,6 +703,7 @@
                             <option value="ยังไม่ได้รับเอกสารตัวจริง">ยังไม่ได้รับเอกสารตัวจริง</option>
                             <option value="อยู่ระหว่างแก้ไข">อยู่ระหว่างแก้ไข</option>
                             <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                            <option value="ส่งไปยังกลุ่ม/ฝ่าย">ส่งไปยังกลุ่ม/ฝ่าย</option>
                             <option value="ส่งเบิกแล้ว (การเงิน)">ส่งเบิกไปที่การเงินแล้ว</option>
                             <option value="ยกเลิก/ไม่เบิก">ยกเลิก/ไม่เบิก</option>
                         </select>
@@ -679,7 +717,11 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">หมายเหตุเพิ่มเติม</label>
+                        <label class="form-label text-muted">หมายเหตุต้นฉบับ (อ่านอย่างเดียว)</label>
+                        <div id="originalNotes" class="form-control bg-light" style="min-height: 38px; height: auto; white-space: pre-wrap; font-size: 0.85rem;"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">หมายเหตุเพิ่มเติม (สำหรับแก้ไข)</label>
                         <textarea id="editNotes" class="form-control" rows="3"
                             placeholder="กรอกหมายเหตุเพิ่มเติม..."></textarea>
                     </div>
@@ -1338,6 +1380,8 @@
                     filterValue = 'ยังไม่เสร็จสิ้นภารกิจ';
                 } else if (step === 'กำลังดำเนินการ') {
                     filterValue = 'กำลังดำเนินการ';
+                } else if (step === 'ส่งไปยังกลุ่ม/ฝ่าย') {
+                    filterValue = 'ส่งไปยังกลุ่ม/ฝ่าย';
                 } else if (step === 'ส่งเบิกแล้ว (การเงิน)') {
                     filterValue = 'ส่งเบิกแล้ว (การเงิน)';
                 } else if (step !== 'WAITING' && step !== 'ยกเลิก/ไม่เบิก') {
@@ -1959,7 +2003,7 @@
                     else if (currentStep === 'ยังไม่ได้รับเอกสารตัวจริง') badgeColor = '#0dcaf0; color: black';
                     else if (currentStep === 'อยู่ระหว่างแก้ไข') badgeColor = '#ffc107; color: black';
                     else if (currentStep === 'กำลังดำเนินการ' || currentStep === 'กำลังดำเนินการเบิก') badgeColor = '#0d6efd';
-                    else if (currentStep === 'ส่งเบิกแล้ว (การเงิน)') badgeColor = '#198754';
+                    else if (currentStep === 'ส่งเบิกแล้ว (การเงิน)' || currentStep === 'ส่งไปยังกลุ่ม/ฝ่าย') badgeColor = '#198754';
                     else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') badgeColor = '#212529';
                     else if (currentStep === 'ยกเลิก/ไม่เบิก') badgeColor = '#dc3545';
 
@@ -2070,7 +2114,10 @@
                 let badgeClass = 'bg-secondary';
                 if (currentStep === 'กวบ.') badgeClass = 'bg-warning text-dark';
                 else if (currentStep === 'ฝบบ.') badgeClass = 'bg-primary';
-                else if (currentStep === 'ส่งกลับกลุ่ม/ฝ่าย') badgeClass = 'bg-success';
+                else if (currentStep === 'ส่งกลับกลุ่ม/ฝ่าย') {
+                    badgeClass = 'bg-purple';
+                    row.classList.add('table-purple');
+                }
                 else if (currentStep === 'ยังไม่ได้รับเอกสารตัวจริง') {
                     badgeClass = 'bg-info text-dark';
                     row.classList.add('table-info');
@@ -2086,6 +2133,10 @@
                 else if (currentStep === 'ส่งเบิกแล้ว (การเงิน)') {
                     badgeClass = 'bg-success';
                     row.classList.add('table-success');
+                }
+                else if (currentStep === 'ส่งไปยังกลุ่ม/ฝ่าย') {
+                    badgeClass = 'bg-purple';
+                    row.classList.add('table-purple');
                 }
                 else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') {
                     badgeClass = 'bg-dark text-white';
@@ -2467,8 +2518,24 @@
                 notes: ''
             };
 
+            // Calculate current step to use as fallback if tracking.step is empty
+            const missionEndDate = parseMissionEndDate(item.originalNotes);
+            let currentStep = tracking.step;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (missionEndDate && today < missionEndDate) {
+                currentStep = 'ยังไม่เสร็จสิ้นภารกิจ';
+            } else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') {
+                currentStep = '';
+            }
+
             document.getElementById('editId').value = key;
-            document.getElementById('editStep').value = tracking.step;
+            document.getElementById('editStep').value = tracking.step || currentStep || '';
+            
+            // Populating data for editing
+            const baseNotes = (item.status ? '[' + item.status + '] ' : '') + (item.originalNotes || '');
+            document.getElementById('originalNotes').innerText = baseNotes || '-';
             document.getElementById('editNotes').value = tracking.notes || '';
 
             if (datePicker) {
