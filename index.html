@@ -94,13 +94,15 @@
             transition: background-color 0.3s ease;
         }
 
-        .btn-outline-hail {
+        .btn-outline-hail, .btn-outline-purple {
             color: #6f42c1;
             border-color: #6f42c1;
         }
 
         .btn-outline-hail:hover,
-        .btn-outline-hail.active {
+        .btn-outline-hail.active,
+        .btn-outline-purple:hover,
+        .btn-outline-purple.active {
             background-color: #6f42c1;
             color: white;
         }
@@ -188,6 +190,28 @@
             #docTable td:first-child {
                 display: none !important;
             }
+
+            #summaryTable {
+                font-size: 7pt !important;
+                width: 100% !important;
+                table-layout: auto !important;
+            }
+
+            #summaryTable thead th,
+            #summaryTable tbody td {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                min-width: auto !important;
+                padding: 2px !important;
+                word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
+            }
+
+            /* Adjust first column width for print */
+            #summaryTable th:first-child,
+            #summaryTable td:first-child {
+                width: 30px !important;
+            }
         }
     </style>
 </head>
@@ -200,6 +224,7 @@
             <div class="navbar-nav me-auto">
                 <a class="nav-link active" href="#" id="navTracking" onclick="showPage('tracking')">ตารางติดตาม</a>
                 <a class="nav-link" href="#" id="navDashboard" onclick="showPage('dashboard')">แผนการใช้จ่ายงบประมาณ</a>
+                <a class="nav-link" href="#" id="navSummary" onclick="showPage('summary')">สรุปงบประมาณ (GF)</a>
             </div>
             <div class="d-flex" id="planButtons">
                 <button class="btn btn-outline-light me-2 btn-sm active" id="btnPlanBru" onclick="switchPlan('bru')">แผน
@@ -686,6 +711,40 @@
 
     </div>
 
+    <div id="summaryPage" class="container-fluid d-none">
+        <div class="card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 id="summaryTitle" class="mb-3">สรุปงบประมาณ (GF)</h4>
+                    <div id="summaryPlanTabs" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-success btn-sm active" onclick="switchSummaryPlan('bru')">แผน บรู</button>
+                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="switchSummaryPlan('yut')">แผนยุทธ</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="switchSummaryPlan('fun')">แผนฝุ่น</button>
+                        <button type="button" class="btn btn-outline-purple btn-sm" onclick="switchSummaryPlan('hail')">แผนลูกเห็บ</button>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-danger btn-sm" onclick="exportSummaryToPDF()">พิมพ์ / Export PDF</button>
+                    <button class="btn btn-success btn-sm" onclick="fetchSummaryData()">รีเฟรชข้อมูล</button>
+                </div>
+            </div>
+            <div id="summaryLoading" class="text-center p-5" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">กำลังโหลดข้อมูลสรุป...</p>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover" id="summaryTable" style="font-size: 0.75rem;">
+                    <thead id="summaryHeader" class="table-primary text-center align-middle sticky-top bg-primary text-white">
+                    </thead>
+                    <tbody id="summaryBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit Modal -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -785,22 +844,46 @@
             bru: {
                 name: 'แผน บรู',
                 url: 'https://docs.google.com/spreadsheets/d/1E43wKRlEa1xKM5l_zSDdstmAKPtDgw05rwJVeRLgTYk/export?format=csv&gid=1751324569',
-                color: '#198754' // Green
+                summaryGid: '783233359',
+                color: '#198754', // Green
+                levels: [
+                    { bg: '#198754', text: 'white' },
+                    { bg: '#71c08d', text: 'white' },
+                    { bg: '#c3e6cb', text: 'black' }
+                ]
             },
             yut: {
                 name: 'แผนยุทธ',
                 url: 'https://docs.google.com/spreadsheets/d/1lwDV6QKiJ0nx4guP6T8BhIMquCmwIqzn-zdVnjYa_hc/export?format=csv&gid=1294888219',
-                color: '#ffc107' // Yellow
+                summaryGid: '2072042102',
+                color: '#ffc107', // Yellow
+                levels: [
+                    { bg: '#ffc107', text: 'black' },
+                    { bg: '#ffe082', text: 'black' },
+                    { bg: '#fff9db', text: 'black' }
+                ]
             },
             fun: {
                 name: 'แผนฝุ่น',
                 url: 'https://docs.google.com/spreadsheets/d/1iOX9ISvptU2UpMbVNPTuYHbA4df11dytCHxFYKoSQxg/export?format=csv&gid=2022149520',
-                color: '#dc3545' // Red
+                summaryGid: '577836523',
+                color: '#dc3545', // Red
+                levels: [
+                    { bg: '#dc3545', text: 'white' },
+                    { bg: '#e57373', text: 'white' },
+                    { bg: '#ffcdd2', text: 'black' }
+                ]
             },
             hail: {
                 name: 'แผนลูกเห็บ',
                 url: 'https://docs.google.com/spreadsheets/d/1SM0GYznjAKPOQT-itypsk83n7l5rx9ibWzKcLGZb4H4/export?format=csv&gid=1068774762',
-                color: '#6f42c1' // Purple
+                summaryGid: '783233359',
+                color: '#6f42c1', // Purple
+                levels: [
+                    { bg: '#6f42c1', text: 'white' },
+                    { bg: '#9575cd', text: 'white' },
+                    { bg: '#d1c4e9', text: 'black' }
+                ]
             }
         };
 
@@ -882,24 +965,193 @@
         }
 
         async function showPage(page) {
+            // Hide all pages
+            document.getElementById('trackingPage').classList.add('d-none');
+            document.getElementById('dashboardPage').classList.add('d-none');
+            document.getElementById('summaryPage').classList.add('d-none');
+
+            // Remove active class from all nav links
+            document.getElementById('navTracking').classList.remove('active');
+            document.getElementById('navDashboard').classList.remove('active');
+            document.getElementById('navSummary').classList.remove('active');
+
             if (page === 'dashboard') {
-                document.getElementById('trackingPage').classList.add('d-none');
                 document.getElementById('dashboardPage').classList.remove('d-none');
-                document.getElementById('navTracking').classList.remove('active');
                 document.getElementById('navDashboard').classList.add('active');
                 document.getElementById('planButtons').classList.add('d-none');
                 document.getElementById('notificationArea').classList.add('d-none');
                 await fetchAllData();
                 renderDashboard();
+            } else if (page === 'summary') {
+                document.getElementById('summaryPage').classList.remove('d-none');
+                document.getElementById('navSummary').classList.add('active');
+                document.getElementById('planButtons').classList.add('d-none');
+                document.getElementById('notificationArea').classList.add('d-none');
+                switchSummaryPlan(currentPlan);
             } else {
                 document.getElementById('trackingPage').classList.remove('d-none');
-                document.getElementById('dashboardPage').classList.add('d-none');
                 document.getElementById('navTracking').classList.add('active');
-                document.getElementById('navDashboard').classList.remove('active');
                 document.getElementById('planButtons').classList.remove('d-none');
                 document.getElementById('notificationArea').classList.remove('d-none');
+                
+                // Update top plan buttons to match currentPlan
+                document.querySelectorAll('#planButtons .btn').forEach(btn => {
+                    const id = btn.id.replace('btnPlan', '').toLowerCase();
+                    btn.classList.toggle('active', id === currentPlan.toLowerCase());
+                });
+                
                 fetchData();
             }
+        }
+
+        async function fetchSummaryData() {
+            const plan = PLANS[currentPlan];
+            const baseUrl = plan.url.split('/export')[0];
+            const summaryUrl = `${baseUrl}/export?format=csv&gid=${plan.summaryGid}`;
+            
+            document.getElementById('summaryLoading').style.display = 'block';
+            try {
+                const response = await fetch(summaryUrl);
+                const csvText = await response.text();
+                Papa.parse(csvText, {
+                    skipEmptyLines: true,
+                    complete: function (results) {
+                        renderSummaryPage(results.data);
+                        document.getElementById('summaryLoading').style.display = 'none';
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching summary data:', error);
+                document.getElementById('summaryLoading').style.display = 'none';
+                alert('ไม่สามารถโหลดข้อมูลสรุปได้');
+            }
+        }
+
+        function switchSummaryPlan(planId) {
+            currentPlan = planId;
+            const plan = PLANS[planId];
+            
+            // Update UI buttons in Summary Page
+            const buttons = document.querySelectorAll('#summaryPlanTabs .btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(`'${planId}'`)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update Global Navbar Color (Keep in sync with switchPlan)
+            const navbar = document.querySelector('.navbar');
+            navbar.style.backgroundColor = plan.color;
+            navbar.classList.remove('bg-primary');
+            if (planId === 'yut') {
+                navbar.classList.remove('navbar-dark');
+                navbar.classList.add('navbar-light');
+            } else {
+                navbar.classList.remove('navbar-light');
+                navbar.classList.add('navbar-dark');
+            }
+
+            // Update Global Title
+            const title = `ระบบติดตามเอกสาร - ${plan.name}`;
+            document.getElementById('pageTitle').innerText = title;
+            document.title = title;
+
+            // Update Summary Page Title
+            const summaryTitle = document.getElementById('summaryTitle');
+            if (summaryTitle) {
+                summaryTitle.innerText = `สรุปงบประมาณ (GF) - ${plan.name}`;
+                summaryTitle.style.color = plan.color;
+            }
+            
+            fetchSummaryData();
+        }
+
+        function renderSummaryPage(data) {
+            if (!data || data.length < 8) return;
+
+            const headerRow = data[6];
+            const subHeaderRow = data[7];
+            const tbody = document.getElementById('summaryBody');
+            const thead = document.getElementById('summaryHeader');
+            const plan = PLANS[currentPlan];
+
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+            
+            // Apply plan color to header
+            thead.style.backgroundColor = plan.color;
+            thead.classList.remove('bg-primary', 'table-primary');
+
+            // Columns to exclude: 3 (งบประมาณที่ได้รับ), 4 (ปรับฐานเพิ่ม), 5 (ลด), 7 (แผนสะสม), 17 (ผลต่าง แผน-ผล)
+            const excludeIndices = [3, 4, 5, 7, 17];
+
+            // Create headers
+            let headerHtml = '<tr>';
+            headerRow.forEach((cell, index) => {
+                if (index < 20 && !excludeIndices.includes(index)) {
+                    const mainText = (cell || '').trim().replace(/\n/g, '<br>');
+                    const subText = (subHeaderRow[index] || '').trim().replace(/\n/g, '<br>');
+                    const width = index === 0 ? 'width: 40px;' : 'min-width: 80px;';
+                    headerHtml += `<th style="${width}">${mainText}${subText ? '<br><small>' + subText + '</small>' : ''}</th>`;
+                }
+            });
+            headerHtml += '</tr>';
+            thead.innerHTML = headerHtml;
+
+                    // Create body rows starting from index 8
+                    for (let i = 8; i < data.length; i++) {
+                        const row = data[i];
+                        if (row.some(cell => cell.trim() !== '')) {
+                            const col0 = (row[0] || '').trim();
+                            const col1 = (row[1] || '').trim();
+
+                            // ซ่อน 1งบบุคลากร และหัวข้อย่อยที่เกี่ยวข้อง
+                            if (col0 === '1' || col0 === '1.1' || col0 === '1.2' || col0 === '1.3' || 
+                                col1.includes('- เงินเดือน') || col1.includes('- ค่าครองชีพ')) {
+                                continue;
+                            }
+
+                            let rowHtml = '<tr>';
+                            for (let j = 0; j < 20; j++) {
+                                if (excludeIndices.includes(j)) continue;
+                                
+                                const cell = (row[j] || '').trim();
+                                // Check if it's a number to align right
+                                const isNumber = cell !== '' && !isNaN(cell.replace(/,/g, '').replace(/%/g, '')) || cell.includes(',');
+                                
+                                let alignClass = isNumber ? 'text-end' : 'text-start';
+                                if (j === 0) alignClass = 'text-center'; // Center the 'ลำดับ' column
+                                
+                                // Formatting for special rows
+                                let rowClass = '';
+                                let rowStyle = '';
+                                if (col0 === '' && col1 && col1.includes('รวมทั้งสิ้น')) {
+                                    rowClass = 'fw-bold';
+                                    rowStyle = `background-color: ${plan.color}; color: ${currentPlan === 'yut' ? 'black' : 'white'};`;
+                                } else if (col0 && (col0.startsWith('A') || col0.startsWith('B') || col0.startsWith('C'))) {
+                                    // หมวด A, B, C และย่อย (A1, B1, C1...) ให้เป็นสีเทาอ่อน
+                                    rowClass = 'table-light fw-bold';
+                                } else if (col0) {
+                                    // ไล่สีตามระดับหัวข้อ (dots) ตามแผนที่เลือก
+                                    const dotCount = (col0.match(/\./g) || []).length;
+                                    const levelIndex = Math.min(dotCount, 2);
+                                    const level = plan.levels[levelIndex];
+                                    rowClass = 'fw-bold';
+                                    rowStyle = `background-color: ${level.bg}; color: ${level.text};`;
+                                }
+                                
+                                rowHtml += `<td class="${alignClass} ${rowClass}" style="${rowStyle}">${cell}</td>`;
+                            }
+                            rowHtml += '</tr>';
+                            tbody.innerHTML += rowHtml;
+                        }
+                    }
+        }
+
+        function exportSummaryToPDF() {
+            window.print();
         }
 
         async function fetchAllData() {
