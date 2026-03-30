@@ -124,6 +124,8 @@
         tr.table-info td:first-child { border-left: 5px solid #0dcaf0 !important; }
         tr.table-purple td:first-child { border-left: 5px solid #6f42c1 !important; }
         tr.table-secondary td:first-child { border-left: 5px solid #6c757d !important; }
+        tr.table-teal { background-color: #e0f2f1 !important; }
+        tr.table-teal td:first-child { border-left: 5px solid #009688 !important; }
 
         .status-date {
             font-size: 0.75rem;
@@ -138,6 +140,7 @@
         tr.table-info .status-date { color: #055160 !important; }
         tr.table-purple .status-date { color: #4a148c !important; }
         tr.table-secondary .status-date { color: #6c757d !important; }
+        tr.table-teal .status-date { color: #00796b !important; }
 
         @media print {
             @page {
@@ -491,6 +494,14 @@
                                         id="filterMissionNoDate" checked>
                                     <label class="form-check-label" for="filterMissionNoDate">ไม่พบวันที่</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold d-block">กรองการตัดยอด:</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="filterShowCutoff" onchange="renderTable()">
+                                <label class="form-check-label" for="filterShowCutoff">แสดงรายการที่ตัดยอดแล้ว</label>
                             </div>
                         </div>
                     </div>
@@ -1195,6 +1206,7 @@
                     dept: dept,
                     category: (row['หมวด'] || '').trim(),
                     amount: (row['วงเงิน'] || '').toString().trim(),
+                    cutoffNum: (row['เลขที่ระบบตัดยอด'] || '').toString().trim(),
                     originalNotes: row['หมายเหตุ'] || '',
                     status: row['Note'] || ''
                 };
@@ -1758,10 +1770,17 @@
 
             // Filter by search text
             if (filter) {
+                const lowerFilter = filter.toLowerCase();
                 filteredData = filteredData.filter(item => {
-                    const searchStr = `${item.bookNum} ${item.controlDate} ${item.name} ${item.dept} ${item.category} ${item.status}`.toLowerCase();
-                    return searchStr.includes(filter.toLowerCase());
+                    const searchStr = `${item.bookNum} ${item.controlDate} ${item.name} ${item.dept} ${item.category} ${item.status} ${item.cutoffNum}`.toLowerCase();
+                    return searchStr.includes(lowerFilter);
                 });
+            }
+
+            // Filter by Cut-off status (Hide if cutoffNum is present and filterShowCutoff is unchecked)
+            const showCutoff = document.getElementById('filterShowCutoff')?.checked;
+            if (!showCutoff) {
+                filteredData = filteredData.filter(item => !item.cutoffNum);
             }
 
             return filteredData;
@@ -2259,6 +2278,12 @@
                     else if (currentStep === 'ยังไม่เสร็จสิ้นภารกิจ') badgeColor = '#212529';
                     else if (currentStep === 'ยกเลิก/ไม่เบิก') badgeColor = '#dc3545';
 
+                    let statusText = currentStep || '-';
+                    if (item.cutoffNum) {
+                        badgeColor = '#198754'; // Success green
+                        statusText = 'ตัดยอดไปแล้ว (' + item.cutoffNum + ')';
+                    }
+
                     let notes = tracking.notes || '';
                     if (item.status) notes = `<span style="color: red; font-weight: bold;">[${item.status}]</span> ${notes}`;
                     if (item.originalNotes) notes += (notes ? '<br>' : '') + `<small style="color: #666; font-size: 9px;">${item.originalNotes}</small>`;
@@ -2273,7 +2298,7 @@
                             <td class="text-center">${item.dept}</td>
                             <td class="text-right">${item.amount || '-'}</td>
                             <td class="text-center">
-                                <span class="badge" style="background-color: ${badgeColor}">${currentStep || '-'}</span><br>
+                                <span class="badge" style="background-color: ${badgeColor}">${statusText}</span><br>
                                 <small style="font-size: 8px; color: #0d6efd;">(${formatDateThai(tracking.lastModified)})</small>
                             </td>
                             <td class="text-center">${formatDateThai(tracking.location)}</td>
@@ -2364,7 +2389,11 @@
 
                 // Color coding for steps
                 let badgeClass = 'bg-secondary';
-                if (currentStep === 'กวบ.') badgeClass = 'bg-warning text-dark';
+                if (item.cutoffNum) {
+                    badgeClass = 'bg-success';
+                    row.classList.add('table-success'); // prioritize cut-off
+                }
+                else if (currentStep === 'กวบ.') badgeClass = 'bg-warning text-dark';
                 else if (currentStep === 'ฝบบ.') badgeClass = 'bg-primary';
                 else if (currentStep === 'ส่งกลับกลุ่ม/ฝ่าย') {
                     badgeClass = 'bg-purple';
@@ -2380,11 +2409,10 @@
                 }
                 else if (currentStep === 'กำลังดำเนินการ' || currentStep === 'กำลังดำเนินการเบิก') {
                     badgeClass = 'bg-primary';
-                    row.classList.add('table-primary');
                 }
                 else if (currentStep === 'ส่งเบิกแล้ว (การเงิน)') {
                     badgeClass = 'bg-success';
-                    row.classList.add('table-success');
+                    row.classList.add('table-teal');
                 }
                 else if (currentStep === 'ส่งไปยังกลุ่ม/ฝ่าย') {
                     badgeClass = 'bg-purple';
@@ -2454,30 +2482,34 @@
                     }
                 }
 
+                const canEdit = !item.cutoffNum;
+                if (!canEdit) row.style.cursor = 'default';
+                const clickAction = canEdit ? `onclick="openEdit('${key}')"` : '';
+
                 row.innerHTML = `
                     <td><input type="checkbox" class="form-check-input row-checkbox" data-key="${key}"></td>
-                    <td onclick="openEdit('${key}')">${item.id}</td>
-                    <td onclick="openEdit('${key}')">${item.bookNum}</td>
-                    <td class="col-date" onclick="openEdit('${key}')">${formatDateThai(item.controlDate)}</td>
-                    <td style="text-align: center;" onclick="openEdit('${key}')">
+                    <td ${clickAction}>${item.id}</td>
+                    <td ${clickAction}>${item.bookNum}</td>
+                    <td class="col-date" ${clickAction}>${formatDateThai(item.controlDate)}</td>
+                    <td style="text-align: center;" ${clickAction}>
                         <strong>${daysDisplay}</strong>
                     </td>
-                    <td onclick="openEdit('${key}')">${item.name}</td>
-                    <td onclick="openEdit('${key}')">${item.dept}</td>
-                    <td onclick="openEdit('${key}')" style="text-align: right;">${item.amount || '-'}</td>
-                    <td onclick="openEdit('${key}')">
-                        <span class="badge ${badgeClass}">${currentStep || '-'}</span>
+                    <td ${clickAction}>${item.name}</td>
+                    <td ${clickAction}>${item.dept}</td>
+                    <td ${clickAction} style="text-align: right;">${item.amount || '-'}</td>
+                    <td ${clickAction}>
+                        <span class="badge ${badgeClass}">${item.cutoffNum ? 'ตัดยอดไปแล้ว (' + item.cutoffNum + ')' : (currentStep || '-')}</span>
                         <div style="font-size: 0.75rem; color: #0d6efd; font-weight: bold; margin-top: 2px;">
                             (${lastModifiedDisplay})
                         </div>
                     </td>
-                    <td class="col-date" onclick="openEdit('${key}')">
+                    <td class="col-date" ${clickAction}>
                         ${formatDateThai(tracking.location)}
                     </td>
-                    <td style="text-align: center;" onclick="openEdit('${key}')">
+                    <td style="text-align: center;" ${clickAction}>
                         ${missionEndedDaysDisplay} ${missionStatusIcon}
                     </td>
-                    <td class="col-notes" onclick="openEdit('${key}')">
+                    <td class="col-notes" ${clickAction}>
                         <small class="text-danger d-block">${item.status ? '[' + item.status + '] ' : ''}${tracking.notes || ''}</small>
                         ${item.originalNotes || '-'}
                     </td>
@@ -2763,6 +2795,11 @@
         function openEdit(key) {
             const item = documentData.find(d => `${currentPlan}-${d.id}` === key);
             if (!item) return;
+
+            if (item.cutoffNum) {
+                alert('รายการนี้ถูกตัดยอดไปแล้ว ไม่สามารถแก้ไขได้');
+                return;
+            }
 
             const tracking = trackingStore[key] || {
                 step: '',
