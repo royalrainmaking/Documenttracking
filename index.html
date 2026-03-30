@@ -497,11 +497,15 @@
                             </div>
                         </div>
 
-                        <div class="col-md-3 mb-3">
+                        <div class="col-md-5 mb-3">
                             <label class="form-label fw-bold d-block">กรองการตัดยอด:</label>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="filterShowCutoff" onchange="renderTable()">
+                                <input class="form-check-input" type="checkbox" id="filterShowCutoff" onchange="renderTableShowCutoff()">
                                 <label class="form-check-label" for="filterShowCutoff">แสดงรายการที่ตัดยอดแล้ว</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="filterOnlyCutoff" onchange="renderTableOnlyCutoff()">
+                                <label class="form-check-label" for="filterOnlyCutoff">แสดงเฉพาะรายการที่ตัดยอดแล้ว</label>
                             </div>
                         </div>
                     </div>
@@ -1777,9 +1781,13 @@
                 });
             }
 
-            // Filter by Cut-off status (Hide if cutoffNum is present and filterShowCutoff is unchecked)
+            // Filter by Cut-off status
             const showCutoff = document.getElementById('filterShowCutoff')?.checked;
-            if (!showCutoff) {
+            const onlyCutoff = document.getElementById('filterOnlyCutoff')?.checked;
+
+            if (onlyCutoff) {
+                filteredData = filteredData.filter(item => item.cutoffNum);
+            } else if (!showCutoff) {
                 filteredData = filteredData.filter(item => !item.cutoffNum);
             }
 
@@ -2333,6 +2341,22 @@
             printWindow.document.open();
             printWindow.document.write(htmlContent);
             printWindow.document.close();
+        }
+
+        function renderTableOnlyCutoff() {
+            const onlyCutoff = document.getElementById('filterOnlyCutoff').checked;
+            if (onlyCutoff) {
+                document.getElementById('filterShowCutoff').checked = true;
+            }
+            renderTable();
+        }
+
+        function renderTableShowCutoff() {
+            const showCutoff = document.getElementById('filterShowCutoff').checked;
+            if (!showCutoff) {
+                document.getElementById('filterOnlyCutoff').checked = false;
+            }
+            renderTable();
         }
 
         function renderTable(filter = '') {
