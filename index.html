@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบติดตามเอกสาร - แผน บรู</title>
+    <title>ระบบติดตามเอกสาร - แผน บูรณาการ</title>
     <link rel="icon" href="data:,">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
@@ -223,7 +223,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1" id="pageTitle">ระบบติดตามเอกสาร - แผน บรู</span>
+            <span class="navbar-brand mb-0 h1" id="pageTitle">ระบบติดตามเอกสาร - แผน บูรณาการ</span>
             <div class="navbar-nav me-auto">
                 <a class="nav-link active" href="#" id="navTracking" onclick="showPage('tracking')">ตารางติดตาม</a>
                 <a class="nav-link" href="#" id="navDashboard" onclick="showPage('dashboard')">แผนการใช้จ่ายงบประมาณ</a>
@@ -620,7 +620,7 @@
                                 <button type="button" class="btn btn-outline-primary active"
                                     onclick="setDashFilter('plan', 'All', this)">ทุกแผน</button>
                                 <button type="button" class="btn btn-outline-success"
-                                    onclick="setDashFilter('plan', 'bru', this)">แผน บรู</button>
+                                    onclick="setDashFilter('plan', 'bru', this)">แผน บูรณาการ</button>
                                 <button type="button" class="btn btn-outline-warning text-dark"
                                     onclick="setDashFilter('plan', 'yut', this)">แผนยุทธ</button>
                                 <button type="button" class="btn btn-outline-danger"
@@ -732,7 +732,7 @@
                 <div>
                     <h4 id="summaryTitle" class="mb-3">สรุปงบประมาณ (GF)</h4>
                     <div id="summaryPlanTabs" class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-success btn-sm active" onclick="switchSummaryPlan('bru')">แผน บรู</button>
+                        <button type="button" class="btn btn-outline-success btn-sm active" onclick="switchSummaryPlan('bru')">แผน บูรณาการ</button>
                         <button type="button" class="btn btn-outline-warning btn-sm" onclick="switchSummaryPlan('yut')">แผนยุทธ</button>
                         <button type="button" class="btn btn-outline-danger btn-sm" onclick="switchSummaryPlan('fun')">แผนฝุ่น</button>
                         <button type="button" class="btn btn-outline-purple btn-sm" onclick="switchSummaryPlan('hail')">แผนลูกเห็บ</button>
@@ -857,7 +857,7 @@
 
         const PLANS = {
             bru: {
-                name: 'แผน บรู',
+                name: 'แผน บูรณาการ',
                 url: 'https://docs.google.com/spreadsheets/d/1E43wKRlEa1xKM5l_zSDdstmAKPtDgw05rwJVeRLgTYk/export?format=csv&gid=1751324569',
                 summaryGid: '783233359',
                 color: '#198754', // Green
