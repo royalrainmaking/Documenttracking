@@ -210,16 +210,94 @@
                 overflow-wrap: break-word !important;
             }
 
-            /* Adjust first column width for print */
             #summaryTable th:first-child,
             #summaryTable td:first-child {
                 width: 30px !important;
             }
         }
+
+        /* Fake 403 Page Styles */
+        #fake-403-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: white;
+            z-index: 9999;
+            display: none;
+            padding: 8px;
+            font-family: "Times New Roman", Times, serif;
+            color: black;
+            text-align: left;
+        }
+        #fake-403-overlay h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            margin-top: 5px;
+        }
+        #fake-403-overlay p {
+            font-size: 1.15rem;
+            margin-bottom: 15px;
+        }
+        #fake-403-overlay hr {
+            border: 0;
+            border-top: 1px solid #666;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+        #fake-403-overlay address {
+            font-size: 1.05rem;
+            font-style: italic;
+        }
+        #stealth-bypass-btn {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 5px;
+            height: 5px;
+            z-index: 10000;
+            cursor: default;
+            background: transparent;
+        }
     </style>
 </head>
 
 <body>
+
+    <!-- Maintenance Mode Configuration -->
+    <script>
+        // กำหนดเป็น true เพื่อแสดงหน้า 403 (ปิดระบบชั่วคราว), กำหนดเป็น false เพื่อให้เว็บทำงานตามปกติ
+        const ENABLE_MAINTENANCE_MODE = true;
+    </script>
+
+    <!-- Fake 403 Overlay -->
+    <div id="fake-403-overlay">
+        <h1>Forbidden</h1>
+        <p>You don't have permission to access / on this server.</p>
+        <hr>
+        <address>Apache/2.4.39 Server at staging domain.com Port 80</address>
+    </div>
+    
+    <!-- Stealth Bypass Button (Bottom Left) -->
+    <div id="stealth-bypass-btn"></div>
+
+    <script>
+        // Logic to show 403 page
+        if (ENABLE_MAINTENANCE_MODE) {
+            document.getElementById('fake-403-overlay').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // ป้องกันการ scroll เผยให้เห็นเนื้อหาด้านหลัง
+        }
+
+        // Logic for hidden bypass button
+        document.getElementById('stealth-bypass-btn').addEventListener('click', function() {
+            if (ENABLE_MAINTENANCE_MODE) {
+                document.getElementById('fake-403-overlay').style.display = 'none';
+                document.body.style.overflow = ''; // คืนค่าการ scroll
+            }
+        });
+    </script>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
         <div class="container-fluid">
